@@ -1,11 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { ChecksSection } from '@/components/panel/ChecksSection'
-import { ExportSection } from '@/components/panel/ExportSection'
-import { LegendSection } from '@/components/panel/LegendSection'
-import { PrintSection } from '@/components/panel/PrintSection'
-import { SizeSection } from '@/components/panel/SizeSection'
-import { StemSection } from '@/components/panel/StemSection'
-import { TopSection } from '@/components/panel/TopSection'
+import { ConfigurePanel } from '@/components/panel/ConfigurePanel'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 
@@ -35,17 +29,8 @@ export function ConfigurePage() {
       </section>
 
       {/* relative: keeps absolutely positioned sr-only inputs inside the scroll area instead of stretching the page */}
-      <aside aria-labelledby="parameters-title" className="relative border border-ink bg-paper lg:order-1 lg:w-80 lg:overflow-y-auto">
-        <h2 id="parameters-title" className="annotation border-b border-ink px-4 py-2">
-          {t('configure.parameters')}
-        </h2>
-        <TopSection />
-        <LegendSection />
-        <SizeSection />
-        <StemSection />
-        <PrintSection />
-        <ChecksSection />
-        <ExportSection />
+      <aside aria-labelledby="parameters-title" className="relative border border-ink bg-paper lg:order-1 lg:w-80 lg:overflow-hidden">
+        <ConfigurePanel />
       </aside>
     </div>
   )
