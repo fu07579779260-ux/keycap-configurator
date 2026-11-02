@@ -1,33 +1,56 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Base shadcn/ui tokens (light). The industrial theme replaces these in build step 2. */
+/*
+ * Industrial / technical-drawing theme: paper background, ink lines,
+ * one signal colour. Deliberately different from the vase configurator
+ * (dark, soft, rounded). System font stacks only — no font CDN, so the
+ * site also loads where Google Fonts is blocked.
+ */
 :root {
-  --radius: 0.375rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --radius: 0.125rem;
+
+  --paper: #f3f3ef;
+  --ink: #111111;
+  --graphite: #55554f; /* secondary text, 6.9:1 on paper */
+  --rule: #c9c9c2; /* hairlines */
+  --grid: #e2e2dc; /* drawing grid */
+  --signal: #d9480f; /* safety orange: focus, active, dimensions */
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #fafaf7;
+  --card-foreground: var(--ink);
+  --popover: #fafaf7;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: var(--paper);
+  --secondary: #e7e7e1;
+  --secondary-foreground: var(--ink);
+  --muted: #e7e7e1;
+  --muted-foreground: var(--graphite);
+  --accent: #e7e7e1;
+  --accent-foreground: var(--ink);
+  --destructive: #b42318;
+  --border: var(--rule);
+  --input: var(--ink);
+  --ring: var(--signal);
 }
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 2px);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+
+  --radius-sm: var(--radius);
   --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
+  --radius-lg: var(--radius);
+
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-signal: var(--signal);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -50,9 +73,30 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  /* One visible focus style everywhere (keyboard users are a core audience) */
+  :focus-visible {
+    outline: 2px solid var(--signal);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* 5 mm-style drawing grid behind content areas */
+  .drawing-grid {
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
+  }
+
+  /* Small caps-style label used for sheet annotations */
+  .annotation {
+    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-graphite;
   }
 }
