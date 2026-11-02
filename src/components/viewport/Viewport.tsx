@@ -1,11 +1,12 @@
 import { Grid, OrbitControls } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { useLayoutEffect, useState } from 'react'
+import { useLayoutEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { KEY_PITCH, placeholderSize } from '@/geometry/dimensions'
+import { bodyParams, buildBody } from '@/geometry/body'
+import { KEY_PITCH, meshSize } from '@/geometry/dimensions'
 import { useT } from '@/i18n/language'
 import { useDesign } from '@/model/design-context'
-import { KeycapPlaceholder } from './KeycapPlaceholder'
+import { KeycapBody } from './KeycapBody'
 
 // Scene units are millimetres, Y up. Colours match the paper/ink theme tokens.
 const PAPER = '#f3f3ef'
@@ -32,7 +33,8 @@ export default function Viewport() {
   const { config } = useDesign()
   // Bumping this remounts the controls, which also clears leftover damping motion
   const [viewKey, setViewKey] = useState(0)
-  const { width, depth, height } = placeholderSize(config)
+  const mesh = useMemo(() => buildBody(bodyParams(config)), [config])
+  const { width, depth, height } = meshSize(mesh.positions)
   const dims = `${fmt(width)} × ${fmt(depth)} × ${fmt(height)} mm`
 
   return (
@@ -50,7 +52,11 @@ export default function Viewport() {
         <directionalLight position={[30, 60, 40]} intensity={1.8} />
         <directionalLight position={[-40, 20, -30]} intensity={0.5} />
 
-        <KeycapPlaceholder />
+        <KeycapBody
+          mesh={mesh}
+          colour={config.manufacturing.mainColour}
+          translucency={config.manufacturing.translucency}
+        />
 
         {/* 1 mm cells, one section per key pitch */}
         <Grid

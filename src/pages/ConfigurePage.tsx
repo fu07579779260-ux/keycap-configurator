@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { SizeSection } from '@/components/panel/SizeSection'
 import { useT } from '@/i18n/language'
 
 // three.js is large; load it only when the configurator opens
@@ -28,6 +29,7 @@ export function ConfigurePage() {
         <h2 id="parameters-title" className="annotation border-b border-ink px-4 py-2">
           {t('configure.parameters')}
         </h2>
+        <SizeSection />
         <p className="px-4 py-6 text-sm text-graphite">{t('configure.parametersPending')}</p>
       </aside>
     </div>
