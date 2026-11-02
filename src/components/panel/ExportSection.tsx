@@ -1,90 +1,129 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { downloadBlob } from '@/export/download'
-import { designFileName } from '@/export/filename'
-import { meshToStl } from '@/export/stl'
-import type { MeshData } from '@/geometry/body'
-import { loadManifold } from '@/geometry/manifold-loader'
-import { buildKeycap, buildKeycapParts } from '@/geometry/solid'
-import { keycapExtras } from '@/geometry/text-outline'
+import {
+  everythingFiles,
+  formSetFiles,
+  pdfFile,
+  pngFile,
+  rhinoFile,
+  stlFile,
+  zipFiles,
+  type ExportFile,
+} from '@/export/exporters'
+import { designFileName, formSetFileName } from '@/export/filename'
 import { useT } from '@/i18n/language'
+import type { StringKey } from '@/i18n/strings'
 import { useDesign } from '@/model/design-context'
+import { findPreset } from '@/model/printers'
+import { useUserPrinters } from '@/model/user-printers'
 import { PanelSection } from './controls'
 
-/** Whole keycap in one colour, or one part of a two-colour print. */
-type Part = 'whole' | 'main' | 'second'
+type Job = 'stl' | 'main' | 'second' | '3dm' | 'png' | 'pdf' | 'all' | 'set'
 
 type Status =
   | { state: 'idle' }
-  | { state: 'working'; part: Part }
-  | { state: 'done'; fileName: string; kb: number; triangles: number }
-  | { state: 'empty' }
+  | { state: 'working'; job: Job }
+  | { state: 'done'; fileName: string; kb: number }
+  | { state: 'empty'; reason: StringKey }
   | { state: 'error' }
 
 export function ExportSection() {
   const t = useT()
   const { config } = useDesign()
+  const userPresets = useUserPrinters()
+  const printer = findPreset(config.manufacturing.technology, config.manufacturing.printer, userPresets)
   const [status, setStatus] = useState<Status>({ state: 'idle' })
   const twoColour = config.manufacturing.secondColour !== null
 
-  async function exportStl(part: Part) {
-    setStatus({ state: 'working', part })
+  async function run(job: Job) {
+    setStatus({ state: 'working', job })
     try {
-      const wasm = await loadManifold()
-      const extras = keycapExtras(config)
-      let mesh: MeshData | null
-      if (part === 'whole') {
-        mesh = buildKeycap(wasm, config, extras)
-      } else {
-        const parts = buildKeycapParts(wasm, config, extras)
-        mesh = part === 'main' ? parts.body : parts.accent
-      }
-      if (!mesh) {
-        setStatus({ state: 'empty' })
+      const file = await makeFile(job)
+      if (!file) {
+        setStatus({ state: 'empty', reason: job === 'png' ? 'export.noView' : 'export.nothingToColour' })
         return
       }
-      const base = designFileName(config, 'stl')
-      const fileName = part === 'whole' ? base : base.replace(/\.stl$/, `-${part}-colour.stl`)
-      const stl = meshToStl(mesh, `Keycap Configurator - ${fileName}`)
-      downloadBlob(new Blob([stl], { type: 'model/stl' }), fileName)
-      setStatus({ state: 'done', fileName, kb: Math.round(stl.byteLength / 1024), triangles: mesh.indices.length / 3 })
+      downloadBlob(file.blob, file.name)
+      setStatus({ state: 'done', fileName: file.name, kb: Math.max(1, Math.round(file.blob.size / 1024)) })
     } catch (error) {
-      console.error('STL export failed', error)
+      console.error('Export failed', error)
       setStatus({ state: 'error' })
     }
   }
 
+  function makeFile(job: Job): Promise<ExportFile | null> {
+    switch (job) {
+      case 'stl':
+        return stlFile(config, 'whole')
+      case 'main':
+      case 'second':
+        return stlFile(config, job)
+      case '3dm':
+        return rhinoFile(config)
+      case 'png':
+        return pngFile(config)
+      case 'pdf':
+        return pdfFile(config, printer)
+      case 'all':
+        return everythingFiles(config, printer).then((files) => zipFiles(files, designFileName(config, 'zip')))
+      case 'set':
+        return formSetFiles(config).then((files) => zipFiles(files, formSetFileName(config)))
+    }
+  }
+
   const busy = status.state === 'working'
-  const label = (part: Part, key: Parameters<typeof t>[0]) =>
-    status.state === 'working' && status.part === part ? t('export.working') : t(key)
+  const button = (job: Job, key: StringKey, variant: 'default' | 'outline' = 'outline') => (
+    <Button
+      variant={variant}
+      className={variant === 'outline' ? 'border-ink' : undefined}
+      onClick={() => run(job)}
+      disabled={busy}
+    >
+      {status.state === 'working' && status.job === job ? t('export.working') : t(key)}
+    </Button>
+  )
 
   return (
     <PanelSection title={t('section.export')}>
-      <Button className="w-full" onClick={() => exportStl('whole')} disabled={busy}>
-        {label('whole', 'export.stl')}
-      </Button>
+      <div className="grid">{button('stl', 'export.stl', 'default')}</div>
+
       {twoColour && (
         <div className="space-y-2">
           <p className="text-xs text-graphite">{t('export.twoColourHint')}</p>
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" className="border-ink" onClick={() => exportStl('main')} disabled={busy}>
-              {label('main', 'export.mainPart')}
-            </Button>
-            <Button variant="outline" className="border-ink" onClick={() => exportStl('second')} disabled={busy}>
-              {label('second', 'export.secondPart')}
-            </Button>
+            {button('main', 'export.mainPart')}
+            {button('second', 'export.secondPart')}
           </div>
         </div>
       )}
+
+      <div className="space-y-1.5">
+        <p className="text-sm">{t('export.otherFormats')}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {button('3dm', 'export.3dm')}
+          {button('png', 'export.png')}
+          {button('pdf', 'export.pdf')}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <p className="text-sm">{t('export.zip')}</p>
+        <div className="grid gap-2">
+          {button('all', 'export.all')}
+          {button('set', 'export.set')}
+        </div>
+      </div>
+
       {/* Announced to screen readers when the export finishes */}
       <p role="status" className="text-xs text-graphite">
         {status.state === 'done' && (
           <>
             <span className="font-mono break-all text-ink">{status.fileName}</span>
-            {` · ${status.kb} KB · ${status.triangles.toLocaleString()} ${t('export.triangles')}`}
+            {` · ${status.kb} KB`}
           </>
         )}
-        {status.state === 'empty' && t('export.nothingToColour')}
+        {status.state === 'empty' && t(status.reason)}
         {status.state === 'error' && <span className="text-destructive">{t('export.failed')}</span>}
         {status.state === 'idle' && t('export.hint')}
       </p>

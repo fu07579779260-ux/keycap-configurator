@@ -7,6 +7,7 @@ import { stemLayout } from '@/geometry/stems'
 import { useT } from '@/i18n/language'
 import { useDesign } from '@/model/design-context'
 import type { Material } from '@/model/options'
+import { CaptureRegistrar } from './CaptureRegistrar'
 import { KeycapBody } from './KeycapBody'
 import { useKeycapMesh } from './use-keycap-mesh'
 
@@ -111,6 +112,7 @@ export default function Viewport() {
           />
         )}
         <CameraHome homeKey={homeKey} mode={view.mode} distance={distance} targetY={targetY} />
+        <CaptureRegistrar />
         <OrbitControls
           key={homeKey}
           makeDefault

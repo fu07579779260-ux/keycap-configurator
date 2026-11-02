@@ -5,7 +5,7 @@ import { meshVolume } from '@/geometry/dimensions'
 import { buildKeycap } from '@/geometry/solid'
 import { DEFAULT_CONFIG } from '@/model/config'
 import { sanitizeConfig } from '@/model/sanitize'
-import { designFileName } from './filename'
+import { designFileName, formSetFileName } from './filename'
 import { meshToStl } from './stl'
 
 /** Read a binary STL back into triangles. */
@@ -63,6 +63,10 @@ describe('meshToStl', () => {
 describe('designFileName', () => {
   it('describes the design', () => {
     expect(designFileName(DEFAULT_CONFIG, 'stl')).toBe('keycap-cherry-r3-1u-concave-mx.stl')
+  })
+
+  it('names the five-forms set after the key, not its current form', () => {
+    expect(formSetFileName(DEFAULT_CONFIG)).toBe('keycap-cherry-r3-1u-five-forms-mx.zip')
   })
 
   it('leaves out the row for profiles without rows', () => {
