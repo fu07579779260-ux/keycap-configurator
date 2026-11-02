@@ -105,7 +105,7 @@ export function sanitizeConfig(input: unknown): KeycapConfig {
   const config = out as unknown as KeycapConfig
   const m = config.manufacturing
   if (!PRINTERS[m.technology].includes(m.printer) && !m.printer.startsWith('user:')) m.printer = 'generic'
-  if (!MATERIALS[m.technology].includes(m.material)) m.material = TECHNOLOGY_DEFAULTS[m.technology].material
+  if (!isOneOf(MATERIALS[m.technology], m.material)) m.material = TECHNOLOGY_DEFAULTS[m.technology].material
   if (config.stem.type !== 'upload') config.stem.uploadName = null
 
   return config

@@ -110,6 +110,35 @@ export function ChoiceGroup<T extends string>({ label, value, options, onChange,
   )
 }
 
+/** Native drop-down, for lists too long or too wordy for a segmented choice. */
+export function SelectField<T extends string>({ label, value, options, onChange }: {
+  label: string
+  value: T
+  options: readonly { value: T; label: string }[]
+  onChange: (value: T) => void
+}) {
+  const id = useId()
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-sm">
+        {label}
+      </label>
+      <select
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value as T)}
+        className="w-full border border-ink bg-card px-2 py-1.5 text-sm"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 /** On/off setting drawn as a small switch around a real checkbox. */
 export function ToggleField({ label, checked, onChange, hint }: {
   label: string

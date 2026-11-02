@@ -45,7 +45,9 @@ export type Icon = (typeof ICONS)[number]
 export const TECHNOLOGIES = ['fdm', 'sla', 'sls'] as const
 export type Technology = (typeof TECHNOLOGIES)[number]
 
-export const MATERIALS: Record<Technology, readonly string[]> = {
+export type Material = 'pla' | 'petg' | 'tpu' | 'standard' | 'tough' | 'clear' | 'pa12'
+
+export const MATERIALS: Record<Technology, readonly Material[]> = {
   fdm: ['pla', 'petg', 'tpu'],
   sla: ['standard', 'tough', 'clear'],
   sls: ['pa12'],
@@ -61,7 +63,7 @@ export const PRINTERS: Record<Technology, readonly string[]> = {
 /** Values applied when the technology changes (PLAN.md §5); the user can override them afterwards. */
 export const TECHNOLOGY_DEFAULTS: Record<
   Technology,
-  { fitTolerance: number; material: string; minWall: number; minLegendStroke: number; minFeature: number }
+  { fitTolerance: number; material: Material; minWall: number; minLegendStroke: number; minFeature: number }
 > = {
   fdm: { fitTolerance: 0.15, material: 'pla', minWall: 1.2, minLegendStroke: 0.8, minFeature: 0.4 },
   sla: { fitTolerance: 0.05, material: 'standard', minWall: 0.8, minLegendStroke: 0.3, minFeature: 0.3 },
