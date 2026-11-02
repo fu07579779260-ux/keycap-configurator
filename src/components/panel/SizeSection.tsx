@@ -1,9 +1,10 @@
 import { PROFILE_SHAPES } from '@/geometry/profiles'
+import { isStandardStabiliserWidth, stabiliserSpacing } from '@/geometry/stems'
 import { useT } from '@/i18n/language'
 import { RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
-import { PROFILES, profileHasRows, ROWS, type Profile } from '@/model/options'
-import { ChoiceGroup, PanelSection, ParamSlider } from './controls'
+import { PROFILES, profileHasRows, ROWS, WIDTH_PRESETS, type Profile } from '@/model/options'
+import { ChoiceGroup, PanelSection, ParamSlider, ToggleField } from './controls'
 
 const PROFILE_LABELS: Record<Profile, string> = {
   oem: 'OEM',
@@ -20,9 +21,35 @@ export function SizeSection() {
   const { size } = config
   const hasRows = profileHasRows(size.profile)
   const profileHeight = PROFILE_SHAPES[size.profile].rows[size.row].height
+  const spacing = stabiliserSpacing(size.widthU)
 
   return (
     <PanelSection title={t('section.size')}>
+      <ChoiceGroup
+        label={t('field.width')}
+        value={String(size.widthU)}
+        options={WIDTH_PRESETS.map((w) => ({ value: String(w), label: `${w}u` }))}
+        onChange={(w) => patch('size', { widthU: Number(w) })}
+        columns={5}
+      />
+      <ParamSlider
+        label={t('field.widthExact')}
+        value={size.widthU}
+        range={RANGES.size.widthU}
+        onChange={(widthU) => patch('size', { widthU })}
+      />
+      {spacing !== null && (
+        <ToggleField
+          label={t('field.stabilisers')}
+          checked={size.stabilisers}
+          onChange={(stabilisers) => patch('size', { stabilisers })}
+          hint={
+            isStandardStabiliserWidth(size.widthU)
+              ? `${t('field.stabiliserSpacing')} ${spacing} mm`
+              : `${t('field.stabiliserSpacing')} ${spacing} mm · ${t('field.stabiliserNonStandard')}`
+          }
+        />
+      )}
       <ChoiceGroup
         label={t('field.profile')}
         value={size.profile}

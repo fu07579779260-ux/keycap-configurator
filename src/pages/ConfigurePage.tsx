@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { SizeSection } from '@/components/panel/SizeSection'
+import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 
 // three.js is large; load it only when the configurator opens
@@ -14,15 +15,17 @@ export function ConfigurePage() {
         <h1 id="viewport-title" className="sr-only">
           {t('page.configure.title')}
         </h1>
-        <Suspense
-          fallback={
-            <div className="flex h-full items-center justify-center border border-ink bg-paper">
-              <p className="annotation">{t('viewport.loading')}</p>
-            </div>
-          }
-        >
-          <Viewport />
-        </Suspense>
+        <ViewportErrorBoundary message={t('viewport.failed')}>
+          <Suspense
+            fallback={
+              <div className="flex h-full items-center justify-center border border-ink bg-paper">
+                <p className="annotation">{t('viewport.loading')}</p>
+              </div>
+            }
+          >
+            <Viewport />
+          </Suspense>
+        </ViewportErrorBoundary>
       </section>
 
       <aside aria-labelledby="parameters-title" className="border border-ink bg-paper lg:order-1 lg:w-80 lg:overflow-y-auto">

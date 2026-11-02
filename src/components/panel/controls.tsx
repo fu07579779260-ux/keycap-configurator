@@ -4,8 +4,8 @@ import { cn } from '@/lib/utils'
 
 const UNIT_LABEL: Record<NumberRange['unit'], string> = { mm: 'mm', deg: '°', u: 'u', '%': '%' }
 
-/** Decimal places that match the step, e.g. step 0.05 → 2. */
-const decimals = (step: number) => Math.max(0, -Math.floor(Math.log10(step) + 1e-9))
+/** Decimal places that match the step, e.g. 0.05 → 2, 0.25 → 2, 0.1 → 1. */
+const decimals = (step: number) => String(step).split('.')[1]?.length ?? 0
 
 interface SliderProps {
   label: string
@@ -79,15 +79,16 @@ export function ChoiceGroup<T extends string>({ label, value, options, onChange,
   return (
     <fieldset disabled={disabled} className="space-y-1.5 disabled:opacity-50">
       <legend className="text-sm">{label}</legend>
+      {/* 1px gaps over a rule-coloured background draw the dividers, also when options wrap */}
       <div
-        className="grid border border-ink"
+        className="grid gap-px border border-ink bg-rule"
         style={{ gridTemplateColumns: `repeat(${columns ?? options.length}, minmax(0, 1fr))` }}
       >
         {options.map((o) => (
           <label
             key={o.value}
             className={cn(
-              'relative cursor-pointer border-rule px-1 py-1.5 text-center font-mono text-xs not-last:border-r',
+              'relative cursor-pointer px-1 py-1.5 text-center font-mono text-xs',
               'has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-signal has-[:focus-visible]:-outline-offset-2',
               o.value === value ? 'bg-ink text-paper' : 'bg-card hover:bg-secondary',
             )}
@@ -106,6 +107,45 @@ export function ChoiceGroup<T extends string>({ label, value, options, onChange,
       </div>
       {hint && <p className="text-xs text-graphite">{hint}</p>}
     </fieldset>
+  )
+}
+
+/** On/off setting drawn as a small switch around a real checkbox. */
+export function ToggleField({ label, checked, onChange, hint }: {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  hint?: string
+}) {
+  return (
+    <div className="space-y-1">
+      <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
+        {label}
+        <input
+          type="checkbox"
+          role="switch"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="peer sr-only"
+        />
+        <span
+          aria-hidden="true"
+          className={cn(
+            'relative h-5 w-9 shrink-0 border border-ink transition-colors',
+            'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal',
+            checked ? 'bg-ink' : 'bg-card',
+          )}
+        >
+          <span
+            className={cn(
+              'absolute top-0.5 size-3.5 transition-[left]',
+              checked ? 'left-[1.1rem] bg-paper' : 'left-0.5 bg-ink',
+            )}
+          />
+        </span>
+      </label>
+      {hint && <p className="text-xs text-graphite">{hint}</p>}
+    </div>
   )
 }
 
