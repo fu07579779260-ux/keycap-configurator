@@ -20,9 +20,10 @@ export function StemPosts({ main, stabilisers }: Props) {
   return (
     <>
       {posts.map(({ at: [x, y], colour }) => (
-        <mesh key={`${x},${y}`} position={[x, STEM_PREVIEW_HEIGHT, -y]} renderOrder={10}>
-          <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, STEM_PREVIEW_HEIGHT * 2, 24]} />
-          <meshBasicMaterial color={colour} transparent opacity={0.55} depthTest={false} depthWrite={false} />
+        <mesh key={`${x},${y}`} position={[x, STEM_PREVIEW_HEIGHT / 2, -y]} renderOrder={10}>
+          <cylinderGeometry args={[POST_RADIUS, POST_RADIUS, STEM_PREVIEW_HEIGHT, 24]} />
+          {/* Faint, so the posts hint at the stems without hiding the top surface */}
+          <meshBasicMaterial color={colour} transparent opacity={0.22} depthTest={false} depthWrite={false} />
         </mesh>
       ))}
     </>

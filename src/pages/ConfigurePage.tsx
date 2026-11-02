@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { SizeSection } from '@/components/panel/SizeSection'
+import { TopSection } from '@/components/panel/TopSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
 
@@ -32,6 +33,7 @@ export function ConfigurePage() {
         <h2 id="parameters-title" className="annotation border-b border-ink px-4 py-2">
           {t('configure.parameters')}
         </h2>
+        <TopSection />
         <SizeSection />
         <p className="px-4 py-6 text-sm text-graphite">{t('configure.parametersPending')}</p>
       </aside>
