@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { SizeSection } from '@/components/panel/SizeSection'
+import { StemSection } from '@/components/panel/StemSection'
 import { TopSection } from '@/components/panel/TopSection'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import { useT } from '@/i18n/language'
@@ -35,6 +36,7 @@ export function ConfigurePage() {
         </h2>
         <TopSection />
         <SizeSection />
+        <StemSection />
         <p className="px-4 py-6 text-sm text-graphite">{t('configure.parametersPending')}</p>
       </aside>
     </div>

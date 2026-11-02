@@ -8,6 +8,21 @@ export function footprint(widthU: number) {
   return { width: widthU * KEY_PITCH - KEY_GAP, depth: KEY_PITCH - KEY_GAP }
 }
 
+/** Enclosed volume of a closed mesh in mm³ (positive when faces point outward). */
+export function meshVolume(positions: Float32Array, indices: Uint32Array): number {
+  let v = 0
+  for (let i = 0; i < indices.length; i += 3) {
+    const a = indices[i] * 3
+    const b = indices[i + 1] * 3
+    const c = indices[i + 2] * 3
+    v +=
+      positions[a] * (positions[b + 1] * positions[c + 2] - positions[b + 2] * positions[c + 1]) -
+      positions[a + 1] * (positions[b] * positions[c + 2] - positions[b + 2] * positions[c]) +
+      positions[a + 2] * (positions[b] * positions[c + 1] - positions[b + 1] * positions[c])
+  }
+  return v / 6
+}
+
 /** Overall size of a Z-up mesh: width (x), depth (y), height (z). */
 export function meshSize(positions: Float32Array) {
   const min = [Infinity, Infinity, Infinity]
