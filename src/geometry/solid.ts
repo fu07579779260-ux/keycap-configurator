@@ -28,14 +28,68 @@ export function cavityParams(p: BodyParams, wall: number): BodyParams {
   }
 }
 
+type Extras = { textOutline?: Outline }
+
 /**
- * Hollow keycap with its stems, as a closed printable mesh (Z-up, mm):
- * outer body − cavity, plus the tactile marker, plus each stem post
- * (trimmed to the inside of the cap) minus its socket, widened by the
- * fit tolerance, then the legend raised or engraved.
+ * Hollow keycap with its stems, as one closed printable mesh (Z-up, mm):
+ * outer body − cavity, plus each stem post (trimmed to the inside of the
+ * cap) minus its socket widened by the fit tolerance, plus the tactile
+ * marker and raised legend, minus an engraved legend.
  * `extras.textOutline` carries traced legend text (browser only).
  */
-export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras: { textOutline?: Outline } = {}): MeshData {
+export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras: Extras = {}): MeshData {
+  return withSolids(wasm, config, extras, ({ shell, raised, cut }, own) => {
+    let all = shell
+    if (raised) all = own(all.add(raised))
+    if (cut) all = own(all.subtract(cut))
+    return fromManifold(keepLargest(all, own))
+  })
+}
+
+/**
+ * The keycap split for two-colour printing: `body` in the main colour and
+ * `accent` (marker, raised legend, or the filling of an engraving) in the
+ * second colour. The parts touch but don't overlap; together they make
+ * the same shape as buildKeycap, except that engravings come back filled
+ * (an inlay, flush with the top). `accent` is null when there's nothing to colour.
+ */
+export function buildKeycapParts(
+  wasm: ManifoldToplevel,
+  config: KeycapConfig,
+  extras: Extras = {},
+): { body: MeshData; accent: MeshData | null } {
+  return withSolids(wasm, config, extras, ({ shell, raised, cut }, own) => {
+    const body = cut ? own(shell.subtract(cut)) : shell
+    const pieces: Manifold[] = []
+    if (raised) pieces.push(own(raised.subtract(body)))
+    if (cut) pieces.push(own(cut.intersect(shell)))
+    if (pieces.length === 0) return { body: fromManifold(keepLargest(body, own)), accent: null }
+
+    const accent = own(wasm.Manifold.union(pieces))
+    // Drop anything detached from the cap (same rule as the single-colour keycap)
+    const keep = keepLargest(own(body.add(accent)), own)
+    const keptBody = own(body.intersect(keep))
+    const keptAccent = own(accent.intersect(keep))
+    return {
+      body: fromManifold(keptBody),
+      accent: keptAccent.isEmpty() || keptAccent.volume() < 1e-3 ? null : fromManifold(keptAccent),
+    }
+  })
+}
+
+/** Keep only the biggest connected piece (loose dots beyond the top would print separately). */
+function keepLargest(m: Manifold, own: (m: Manifold) => Manifold): Manifold {
+  const pieces = m.decompose().map(own)
+  return pieces.length > 1 ? pieces.reduce((a, b) => (b.volume() > a.volume() ? b : a)) : m
+}
+
+/** Shared construction; `finish` gets the pieces and must not keep Manifolds beyond its return. */
+function withSolids<T>(
+  wasm: ManifoldToplevel,
+  config: KeycapConfig,
+  extras: Extras,
+  finish: (solids: { shell: Manifold; raised: Manifold | null; cut: Manifold | null }, own: (m: Manifold) => Manifold) => T,
+): T {
   const { Manifold } = wasm
   // Every Manifold lives in WASM memory and must be freed
   const owned: Manifold[] = []
@@ -48,9 +102,6 @@ export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras
     const outer = own(toManifold(wasm, buildBody(p)))
     const cavity = own(own(toManifold(wasm, buildBody(cavityParams(p, wall)))).translate(0, 0, -CUT_MARGIN))
     let shell = own(outer.subtract(cavity))
-
-    const marker = buildMarker(Manifold, p, config.top)
-    if (marker) shell = own(shell.add(own(marker)))
 
     const layout = stemLayout(config)
     const stems = [
@@ -68,16 +119,14 @@ export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras
       shell = own(shell.subtract(socket))
     }
 
-    // Legend last, so an engraving also cuts through where a stem meets the top
+    // Raised material (marker, raised legend) and the engraving, applied by `finish`
+    const marker = buildMarker(Manifold, p, config.top)
     const legend = buildLegend(wasm, p, config.legend, wall, extras.textOutline)
-    if (legend.add) shell = own(shell.add(own(legend.add)))
-    if (legend.cut) shell = own(shell.subtract(own(legend.cut)))
+    const raisedParts = [marker, legend.add].filter((m): m is Manifold => m !== null).map(own)
+    const raised = raisedParts.length === 0 ? null : raisedParts.length === 1 ? raisedParts[0] : own(Manifold.union(raisedParts))
+    const cut = legend.cut ? own(legend.cut) : null
 
-    // Dots or markers placed beyond the top would print as loose pieces: keep only the keycap
-    const pieces = shell.decompose().map(own)
-    if (pieces.length > 1) shell = pieces.reduce((a, b) => (b.volume() > a.volume() ? b : a))
-
-    return fromManifold(shell)
+    return finish({ shell, raised, cut }, own)
   } finally {
     for (const m of owned) m.delete()
   }

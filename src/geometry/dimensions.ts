@@ -23,14 +23,16 @@ export function meshVolume(positions: Float32Array, indices: Uint32Array): numbe
   return v / 6
 }
 
-/** Overall size of a Z-up mesh: width (x), depth (y), height (z). */
-export function meshSize(positions: Float32Array) {
+/** Overall size of one or more Z-up meshes together: width (x), depth (y), height (z). */
+export function meshSize(...meshes: Float32Array[]) {
   const min = [Infinity, Infinity, Infinity]
   const max = [-Infinity, -Infinity, -Infinity]
-  for (let i = 0; i < positions.length; i += 3) {
-    for (let k = 0; k < 3; k++) {
-      min[k] = Math.min(min[k], positions[i + k])
-      max[k] = Math.max(max[k], positions[i + k])
+  for (const positions of meshes) {
+    for (let i = 0; i < positions.length; i += 3) {
+      for (let k = 0; k < 3; k++) {
+        min[k] = Math.min(min[k], positions[i + k])
+        max[k] = Math.max(max[k], positions[i + k])
+      }
     }
   }
   return { width: max[0] - min[0], depth: max[1] - min[1], height: max[2] - min[2] }

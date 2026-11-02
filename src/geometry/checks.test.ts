@@ -100,6 +100,12 @@ describe('printChecks', () => {
     expect(ids(design({ manufacturing: { translucency: 40, material: 'clear' } }))).not.toContain('translucent-opaque')
   })
 
+  it('notes a second colour with nothing to colour', () => {
+    expect(ids(design({ manufacturing: { secondColour: '#1a1a1a' } }))).toContain('second-colour-unused')
+    expect(ids(design({ manufacturing: { secondColour: '#1a1a1a' }, legend: { type: 'icon' } }))).not.toContain('second-colour-unused')
+    expect(ids(design({ manufacturing: { secondColour: '#1a1a1a' }, top: { form: 'tactile' } }))).not.toContain('second-colour-unused')
+  })
+
   it('lists warnings before notes', () => {
     const levels = printChecks(
       design({ stem: { type: 'topre' }, size: { wallThickness: 0.8 }, manufacturing: { technology: 'fdm' } }),

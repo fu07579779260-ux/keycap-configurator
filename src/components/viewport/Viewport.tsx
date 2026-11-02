@@ -6,6 +6,7 @@ import { KEY_PITCH, meshSize } from '@/geometry/dimensions'
 import { stemLayout } from '@/geometry/stems'
 import { useT } from '@/i18n/language'
 import { useDesign } from '@/model/design-context'
+import type { Material } from '@/model/options'
 import { KeycapBody } from './KeycapBody'
 import { useKeycapMesh } from './use-keycap-mesh'
 
@@ -52,9 +53,10 @@ export default function Viewport() {
   const { config } = useDesign()
   // Bumping the counter remounts the controls, which also clears leftover damping motion
   const [view, setView] = useState<{ mode: ViewMode; n: number }>({ mode: 'top', n: 0 })
-  const { mesh, hollow } = useKeycapMesh(config)
+  const { body, accent, hollow } = useKeycapMesh(config)
   const stems = useMemo(() => stemLayout(config), [config])
-  const { width, depth, height } = meshSize(mesh.positions)
+  // Measure both parts together: a raised accent stands above the body
+  const { width, depth, height } = accent ? meshSize(body.positions, accent.positions) : meshSize(body.positions)
   const dims = `${fmt(width)} × ${fmt(depth)} × ${fmt(height)} mm`
 
   const distance = Math.max(BASE_DISTANCE, DISTANCE_PER_MM_WIDTH * width)
@@ -79,10 +81,20 @@ export default function Viewport() {
         <directionalLight position={[-40, -30, -30]} intensity={0.6} />
 
         <KeycapBody
-          mesh={mesh}
+          mesh={body}
           colour={config.manufacturing.mainColour}
+          material={config.manufacturing.material as Material}
           translucency={config.manufacturing.translucency}
         />
+        {accent && config.manufacturing.secondColour && (
+          <KeycapBody
+            mesh={accent}
+            colour={config.manufacturing.secondColour}
+            material={config.manufacturing.material as Material}
+            translucency={0}
+            outline={false}
+          />
+        )}
 
         {/* 1 mm cells, one section per key pitch; hidden from below so it doesn't cover the stems */}
         {view.mode === 'top' && (

@@ -15,6 +15,7 @@ export type CheckId =
   | 'tolerance-tight'
   | 'stem-approx'
   | 'translucent-opaque'
+  | 'second-colour-unused'
 
 /** "warning": likely to print badly or not fit. "note": worth knowing, not a problem by itself. */
 export interface Check {
@@ -98,6 +99,14 @@ export function printChecks(config: KeycapConfig, printer: PrinterPreset): Check
 
   if (manufacturing.translucency > 0 && !CLEAR_MATERIALS.includes(manufacturing.material)) {
     checks.push({ id: 'translucent-opaque', level: 'note', values: {} })
+  }
+
+  const hasLegend =
+    (legend.type === 'text' && legend.text.trim() !== '') ||
+    (legend.type === 'braille' && legend.brailleText !== '') ||
+    legend.type === 'icon'
+  if (manufacturing.secondColour !== null && top.form !== 'tactile' && !hasLegend) {
+    checks.push({ id: 'second-colour-unused', level: 'note', values: {} })
   }
 
   return checks.sort((a, b) => (a.level === b.level ? 0 : a.level === 'warning' ? -1 : 1))

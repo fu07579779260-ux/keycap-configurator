@@ -1,24 +1,38 @@
 import { useEffect, useMemo, useState } from 'react'
 import { bodyParams, buildBody, type MeshData } from '@/geometry/body'
 import { loadManifold } from '@/geometry/manifold-loader'
-import { buildKeycap } from '@/geometry/solid'
+import { buildKeycap, buildKeycapParts } from '@/geometry/solid'
 import { keycapExtras } from '@/geometry/text-outline'
 import type { KeycapConfig } from '@/model/config'
 
+interface KeycapMeshes {
+  /** Main-colour part (the whole keycap when there's no second colour). */
+  body: MeshData
+  /** Second-colour part, when a second colour is on and there's something to colour. */
+  accent: MeshData | null
+  hollow: boolean
+}
+
 /**
- * The printable keycap mesh for a design. The solid body shows instantly;
+ * The printable keycap meshes for a design. The solid body shows instantly;
  * the hollow shell with stems replaces it once the WASM geometry kernel
  * has loaded (and after each change, a few milliseconds later).
  */
-export function useKeycapMesh(config: KeycapConfig): { mesh: MeshData; hollow: boolean } {
+export function useKeycapMesh(config: KeycapConfig): KeycapMeshes {
   const solid = useMemo(() => buildBody(bodyParams(config)), [config])
-  const [shell, setShell] = useState<{ config: KeycapConfig; mesh: MeshData } | null>(null)
+  const [built, setBuilt] = useState<{ body: MeshData; accent: MeshData | null } | null>(null)
 
   useEffect(() => {
     let cancelled = false
     loadManifold()
       .then((wasm) => {
-        if (!cancelled) setShell({ config, mesh: buildKeycap(wasm, config, keycapExtras(config)) })
+        if (cancelled) return
+        const extras = keycapExtras(config)
+        setBuilt(
+          config.manufacturing.secondColour
+            ? buildKeycapParts(wasm, config, extras)
+            : { body: buildKeycap(wasm, config, extras), accent: null },
+        )
       })
       .catch((error) => console.error('Could not build the hollow keycap', error))
     return () => {
@@ -26,7 +40,7 @@ export function useKeycapMesh(config: KeycapConfig): { mesh: MeshData; hollow: b
     }
   }, [config])
 
-  // Keep showing the previous shell while the next one is built, so the view doesn't flicker
-  if (shell) return { mesh: shell.mesh, hollow: true }
-  return { mesh: solid, hollow: false }
+  // Keep showing the previous result while the next one is built, so the view doesn't flicker
+  if (built) return { ...built, hollow: true }
+  return { body: solid, accent: null, hollow: false }
 }
