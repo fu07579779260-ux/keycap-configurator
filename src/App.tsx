@@ -3,14 +3,8 @@ import { AppFooter } from '@/components/layout/AppFooter'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { useT } from '@/i18n/language'
 import { useRoute, type Route } from '@/lib/router'
-import {
-  ComparePage,
-  ConfigurePage,
-  FingerFitPage,
-  HomePage,
-  PresetsPage,
-  SettingsPage,
-} from '@/pages/pages'
+import { ConfigurePage } from '@/pages/ConfigurePage'
+import { ComparePage, FingerFitPage, HomePage, PresetsPage, SettingsPage } from '@/pages/pages'
 
 const PAGES: Record<Route, ComponentType> = {
   '/': HomePage,

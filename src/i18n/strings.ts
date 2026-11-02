@@ -44,6 +44,16 @@ const en = {
     'Language, accessibility, voice feedback, printer presets and local data.',
   'page.pending': 'Coming in a later build step.',
 
+  'configure.parameters': 'Parameters',
+  'configure.parametersPending': 'Stem, size, top form, legend and print settings arrive in the next build steps.',
+  'viewport.label': '3D preview of the keycap',
+  'viewport.loading': 'Loading 3D view…',
+  'viewport.noWebgl': 'This browser cannot show 3D (WebGL is off or unsupported).',
+  'viewport.dimensions': 'W × D × H',
+  'viewport.resetView': 'Reset view',
+  'viewport.placeholder': 'Placeholder shape',
+  'viewport.hint': 'Drag to rotate · scroll to zoom · right-drag to pan',
+
   'footer.drawing': 'Drawing',
   'footer.sheet': 'Sheet',
   'footer.units': 'Units',
@@ -93,6 +103,16 @@ const zh: Record<StringKey, string> = {
   'page.settings.title': '设置',
   'page.settings.summary': '语言、无障碍、语音播报、打印机预设与本地数据。',
   'page.pending': '将在后续构建步骤中完成。',
+
+  'configure.parameters': '参数',
+  'configure.parametersPending': '接口、尺寸、顶面形态、字符和打印设置将在接下来的构建步骤中加入。',
+  'viewport.label': '键帽 3D 预览',
+  'viewport.loading': '正在加载 3D 视图…',
+  'viewport.noWebgl': '此浏览器无法显示 3D（WebGL 未开启或不受支持）。',
+  'viewport.dimensions': '宽 × 深 × 高',
+  'viewport.resetView': '重置视角',
+  'viewport.placeholder': '占位形状',
+  'viewport.hint': '拖动旋转 · 滚轮缩放 · 右键拖动平移',
 
   'footer.drawing': '图号',
   'footer.sheet': '页码',

@@ -53,11 +53,6 @@ export function HomePage() {
   )
 }
 
-export function ConfigurePage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.configure.title')} summary={t('page.configure.summary')} />
-}
-
 export function ComparePage() {
   const t = useT()
   return <PagePlaceholder title={t('page.compare.title')} summary={t('page.compare.summary')} />
