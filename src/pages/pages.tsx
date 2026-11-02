@@ -1,12 +1,12 @@
 import { Button } from '@/components/ui/button'
-import { FormSketch, type TopForm } from '@/components/layout/FormSketch'
+import { FormSketch } from '@/components/layout/FormSketch'
 import { useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
 import { href } from '@/lib/router'
+import { TOP_FORMS } from '@/model/options'
 import { PagePlaceholder } from './placeholder'
 
 const FLOW: StringKey[] = ['home.flow.1', 'home.flow.2', 'home.flow.3', 'home.flow.4', 'home.flow.5']
-const FORMS: TopForm[] = ['flat', 'concave', 'convex', 'angled', 'tactile']
 
 export function HomePage() {
   const t = useT()
@@ -42,7 +42,7 @@ export function HomePage() {
 
       <h2 className="annotation mt-14">{t('home.forms')}</h2>
       <ul className="mt-3 grid grid-cols-2 gap-px border border-ink bg-ink sm:grid-cols-5">
-        {FORMS.map((form) => (
+        {TOP_FORMS.map((form) => (
           <li key={form} className="bg-paper p-4">
             <FormSketch form={form} />
             <p className="mt-2 text-sm font-medium">{t(`form.${form}`)}</p>

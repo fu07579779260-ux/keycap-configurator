@@ -1,6 +1,6 @@
-// Side-elevation sketch of each top form, used on the home page
-export type TopForm = 'flat' | 'concave' | 'convex' | 'angled' | 'tactile'
+import type { TopForm } from '@/model/options'
 
+// Side-elevation sketch of each top form, used on the home page
 const TOP: Record<TopForm, string> = {
   flat: 'M10 14 H54',
   concave: 'M10 14 Q32 24 54 14',
