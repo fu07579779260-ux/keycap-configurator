@@ -35,7 +35,7 @@ function FormPicker({ value, onChange }: { value: TopForm; onChange: (form: TopF
               className="sr-only"
             />
             <FormSketch form={form} />
-            <span className="block text-[11px] leading-tight">{t(`form.${form}`)}</span>
+            <span className="block text-[0.6875rem] leading-tight">{t(`form.${form}`)}</span>
           </label>
         ))}
       </div>

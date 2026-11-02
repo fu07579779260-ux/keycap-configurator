@@ -1,6 +1,7 @@
 import { useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { useT } from '@/i18n/language'
+import type { StringKey } from '@/i18n/strings'
 import { cn } from '@/lib/utils'
 import { RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
@@ -9,8 +10,17 @@ import { findPreset, makeUserPreset, presetsFor } from '@/model/printers'
 import { userPrinters, useUserPrinters } from '@/model/user-printers'
 import { ChoiceGroup, PanelSection, ParamSlider, SelectField, ToggleField } from './controls'
 
-/** Neutral shop colours plus a few accents; any colour can still be picked. */
-const SWATCHES = ['#f2f2f0', '#1a1a1a', '#8a8a85', '#d9480f', '#2f5d8a', '#3d7a4f', '#e8b923', '#b42318']
+/** Neutral filament colours plus a few accents; any colour can still be picked. */
+const SWATCHES: { hex: string; name: StringKey }[] = [
+  { hex: '#f2f2f0', name: 'colour.white' },
+  { hex: '#1a1a1a', name: 'colour.black' },
+  { hex: '#8a8a85', name: 'colour.grey' },
+  { hex: '#d9480f', name: 'colour.orange' },
+  { hex: '#2f5d8a', name: 'colour.blue' },
+  { hex: '#3d7a4f', name: 'colour.green' },
+  { hex: '#e8b923', name: 'colour.yellow' },
+  { hex: '#b42318', name: 'colour.red' },
+]
 
 function ColourField({ label, value, onChange }: { label: string; value: string; onChange: (hex: string) => void }) {
   const t = useT()
@@ -19,11 +29,12 @@ function ColourField({ label, value, onChange }: { label: string; value: string;
     <fieldset className="space-y-1.5">
       <legend className="text-sm">{label}</legend>
       <div className="flex flex-wrap items-center gap-1.5">
-        {SWATCHES.map((hex) => (
+        {SWATCHES.map(({ hex, name }) => (
           <button
             key={hex}
             type="button"
-            aria-label={hex}
+            aria-label={t(name)}
+            title={t(name)}
             aria-pressed={hex === value}
             onClick={() => onChange(hex)}
             className={cn('size-7 border', hex === value ? 'border-signal outline-2 outline-signal' : 'border-ink')}

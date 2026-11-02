@@ -2,7 +2,9 @@ import { useState, type ReactNode } from 'react'
 import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
 import { Button } from '@/components/ui/button'
 import { useT } from '@/i18n/language'
+import { ToggleField } from '@/components/panel/controls'
 import { useDesign } from '@/model/design-context'
+import { displayStore, useDisplay } from '@/model/display'
 import { userPrinters, useUserPrinters } from '@/model/user-printers'
 import { stopAutosave } from '@/persistence/session'
 import { clearAllStorage } from '@/persistence/storage'
@@ -20,6 +22,7 @@ export function SettingsPage() {
   const t = useT()
   const { reset } = useDesign()
   const printers = useUserPrinters()
+  const display = useDisplay()
   const [resetDone, setResetDone] = useState(false)
 
   const clearAll = () => {
@@ -44,7 +47,13 @@ export function SettingsPage() {
       </Block>
 
       <Block title={t('settings.accessibility')}>
-        <p className="text-sm text-graphite">{t('page.pending')}</p>
+        <ToggleField label={t('settings.largeText')} checked={display.largeText} onChange={(largeText) => displayStore.set({ largeText })} />
+        <ToggleField
+          label={t('settings.highContrast')}
+          checked={display.highContrast}
+          onChange={(highContrast) => displayStore.set({ highContrast })}
+        />
+        <p className="text-xs text-graphite">{t('settings.voicePending')}</p>
       </Block>
 
       <Block title={t('settings.printers')}>

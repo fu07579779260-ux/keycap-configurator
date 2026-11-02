@@ -95,7 +95,7 @@ export function ConfigurePanel() {
               type="button"
               aria-pressed={mode === m}
               onClick={() => chooseMode(m)}
-              className={cn('px-2 py-0.5 font-mono text-[11px]', mode === m ? 'bg-ink text-paper' : 'hover:bg-secondary')}
+              className={cn('min-h-7 px-2.5 font-mono text-[0.6875rem]', mode === m ? 'bg-ink text-paper' : 'hover:bg-secondary')}
             >
               {t(`mode.${m}`)}
             </button>

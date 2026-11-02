@@ -1,6 +1,6 @@
 import { Grid, OrbitControls } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
-import { useLayoutEffect, useMemo, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { KEY_PITCH, meshSize } from '@/geometry/dimensions'
 import { stemLayout } from '@/geometry/stems'
@@ -8,7 +8,9 @@ import { useT } from '@/i18n/language'
 import { compareList, MAX_COMPARE, useCompareList } from '@/model/compare-store'
 import { useDesign } from '@/model/design-context'
 import type { Material } from '@/model/options'
+import { prefersReducedMotion } from '@/model/display'
 import { CaptureRegistrar } from './CaptureRegistrar'
+import { KeyboardOrbit } from './KeyboardOrbit'
 import { KeycapBody } from './KeycapBody'
 import { useKeycapMesh } from './use-keycap-mesh'
 
@@ -67,12 +69,11 @@ export default function Viewport() {
   // A new width needs a new framing; other edits keep the user's view
   const homeKey = `${view.mode}:${view.n}:${config.size.widthU}`
   const showView = (mode: ViewMode) => setView((v) => ({ mode, n: v.n + 1 }))
+  const resetView = useCallback(() => setView((v) => ({ mode: 'top', n: v.n + 1 })), [])
 
   return (
     <div className="relative h-full min-h-80 border border-ink bg-paper">
       <Canvas
-        role="img"
-        aria-label={`${t('viewport.label')}: ${dims}`}
         frameloop="demand"
         dpr={[1, 2]}
         camera={{ position: DIRECTIONS.top.map((v) => v * distance) as [number, number, number], fov: 35, near: 0.5, far: 4000 }}
@@ -115,9 +116,11 @@ export default function Viewport() {
         )}
         <CameraHome homeKey={homeKey} mode={view.mode} distance={distance} targetY={targetY} />
         <CaptureRegistrar />
+        <KeyboardOrbit onReset={resetView} label={`${t('viewport.label')}: ${dims}`} describedBy="viewport-keys" />
         <OrbitControls
           key={homeKey}
           makeDefault
+          enableDamping={!prefersReducedMotion()}
           target={[0, targetY, 0]}
           minDistance={20}
           maxDistance={distance * 3}
@@ -160,7 +163,9 @@ export default function Viewport() {
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-wrap justify-between gap-2 p-3">
         <p className="annotation text-signal">{hollow ? t('viewport.printable') : t('viewport.building')}</p>
-        <p className="annotation">{t('viewport.hint')}</p>
+        <p id="viewport-keys" className="annotation">
+          {t('viewport.hint')}
+        </p>
       </div>
     </div>
   )

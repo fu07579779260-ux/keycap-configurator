@@ -1,8 +1,10 @@
 import { Grid, Html, OrbitControls } from '@react-three/drei'
 import { Canvas } from '@react-three/fiber'
-import { useRef, useState, type RefObject } from 'react'
+import { useCallback, useRef, useState, type RefObject } from 'react'
 import { Button } from '@/components/ui/button'
+import { KeyboardOrbit } from '@/components/viewport/KeyboardOrbit'
 import { KeycapBody } from '@/components/viewport/KeycapBody'
+import { prefersReducedMotion } from '@/model/display'
 import { useKeycapMesh } from '@/components/viewport/use-keycap-mesh'
 import { footprint, KEY_PITCH } from '@/geometry/dimensions'
 import { useT } from '@/i18n/language'
@@ -40,6 +42,7 @@ function CompareKey({ config, x, label, labels }: {
 export default function CompareViewport({ items }: { items: CompareItem[] }) {
   const t = useT()
   const [viewKey, setViewKey] = useState(0)
+  const resetView = useCallback(() => setViewKey((k) => k + 1), [])
   // Labels go into this overlay; without it, the first label can mount before the canvas container exists
   const labels = useRef<HTMLDivElement>(null)
 
@@ -60,8 +63,6 @@ export default function CompareViewport({ items }: { items: CompareItem[] }) {
     <div className="relative h-full min-h-72 border border-ink bg-paper">
       <Canvas
         key={viewKey}
-        role="img"
-        aria-label={t('compare.viewLabel')}
         frameloop="demand"
         dpr={[1, 2]}
         camera={{ position: [0, distance * 0.55, distance * 0.75], fov: 35, near: 0.5, far: 5000 }}
@@ -85,14 +86,29 @@ export default function CompareViewport({ items }: { items: CompareItem[] }) {
           fadeDistance={Math.max(260, distance * 3)}
           fadeStrength={1.5}
         />
-        <OrbitControls makeDefault target={[0, 4, 0]} minDistance={20} maxDistance={distance * 3} maxPolarAngle={Math.PI * 0.495} />
+        <KeyboardOrbit
+          onReset={resetView}
+          label={`${t('compare.viewLabel')}: ${items.length}`}
+          describedBy="compare-keys"
+        />
+        <OrbitControls
+          makeDefault
+          enableDamping={!prefersReducedMotion()}
+          target={[0, 4, 0]}
+          minDistance={20}
+          maxDistance={distance * 3}
+          maxPolarAngle={Math.PI * 0.495}
+        />
       </Canvas>
       <div ref={labels} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden" />
       <div className="pointer-events-none absolute top-0 right-0 p-3">
-        <Button size="sm" variant="outline" className="pointer-events-auto border-ink bg-paper" onClick={() => setViewKey((k) => k + 1)}>
+        <Button size="sm" variant="outline" className="pointer-events-auto border-ink bg-paper" onClick={resetView}>
           {t('viewport.resetView')}
         </Button>
       </div>
+      <p id="compare-keys" className="annotation pointer-events-none absolute bottom-0 right-0 p-3">
+        {t('viewport.hint')}
+      </p>
     </div>
   )
 }

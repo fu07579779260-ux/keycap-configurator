@@ -15,7 +15,7 @@
   --graphite: #55554f; /* secondary text, 6.9:1 on paper */
   --rule: #c9c9c2; /* hairlines */
   --grid: #e2e2dc; /* drawing grid */
-  --signal: #d9480f; /* safety orange: focus, active, dimensions */
+  --signal: #c2410c; /* safety orange: focus, active, dimensions; 4.7:1 on paper, so also fine for text */
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -35,6 +35,40 @@
   --border: var(--rule);
   --input: var(--ink);
   --ring: var(--signal);
+  --focus-width: 2px;
+}
+
+/* High contrast (Settings, or the system's "increase contrast"): pure black on white, darker signal */
+:root[data-contrast="high"] {
+  --paper: #ffffff;
+  --ink: #000000;
+  --graphite: #1f1f1f;
+  --rule: #000000;
+  --grid: #d4d4d4;
+  --signal: #a12f00;
+  --card: #ffffff;
+  --popover: #ffffff;
+  --secondary: #e4e4e4;
+  --muted: #e4e4e4;
+  --accent: #e4e4e4;
+  --destructive: #8f1209;
+  --focus-width: 3px;
+}
+
+/* Large text: everything is sized in rem, so scaling the root scales the whole interface */
+:root[data-text="large"] {
+  font-size: 118.75%;
+}
+
+/* Honour "reduce motion": no transitions or animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @theme inline {
@@ -80,7 +114,7 @@
   }
   /* One visible focus style everywhere (keyboard users are a core audience) */
   :focus-visible {
-    outline: 2px solid var(--signal);
+    outline: var(--focus-width) solid var(--signal);
     outline-offset: 2px;
   }
 }
@@ -97,6 +131,6 @@
 
   /* Small caps-style label used for sheet annotations */
   .annotation {
-    @apply font-mono text-[11px] uppercase tracking-[0.12em] text-graphite;
+    @apply font-mono text-[0.6875rem] uppercase tracking-[0.12em] text-graphite;
   }
 }

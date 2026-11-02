@@ -34,7 +34,7 @@ export function PresetsPage() {
             <li key={p.id} className="flex flex-col gap-2 bg-paper p-4">
               <h3 className="font-medium">{t(p.name)}</h3>
               <p className="flex-1 text-sm text-graphite">{t(p.description)}</p>
-              <p className="font-mono text-[11px] text-graphite">{describeDesign(p.config, t)}</p>
+              <p className="font-mono text-[0.6875rem] text-graphite">{describeDesign(p.config, t)}</p>
               <Button size="sm" className="self-start" onClick={() => open(p.config)}>
                 {t('presets.open')}
               </Button>
@@ -55,7 +55,7 @@ export function PresetsPage() {
               <li key={d.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-2">
                 <span className="min-w-0 flex-1">
                   <span className="block font-medium">{d.name}</span>
-                  <span className="block font-mono text-[11px] text-graphite">
+                  <span className="block font-mono text-[0.6875rem] text-graphite">
                     {new Date(d.savedAt).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-GB')} · {describeDesign(d.config, t)}
                   </span>
                 </span>
