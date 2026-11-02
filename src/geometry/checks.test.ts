@@ -106,6 +106,14 @@ describe('printChecks', () => {
     expect(ids(design({ manufacturing: { secondColour: '#1a1a1a' }, top: { form: 'tactile' } }))).not.toContain('second-colour-unused')
   })
 
+  it('warns when the design needs an uploaded base that is not loaded', () => {
+    const config = design({ stem: { type: 'upload', uploadName: 'stem.stl' } })
+    const printer = findPreset('sla', 'generic')
+    expect(printChecks(config, printer).map((c) => c.id)).toContain('upload-missing')
+    expect(printChecks(config, printer, { hasUpload: true }).map((c) => c.id)).not.toContain('upload-missing')
+    expect(printChecks(DEFAULT_CONFIG, printer).map((c) => c.id)).not.toContain('upload-missing')
+  })
+
   it('lists warnings before notes', () => {
     const levels = printChecks(
       design({ stem: { type: 'topre' }, size: { wallThickness: 0.8 }, manufacturing: { technology: 'fdm' } }),

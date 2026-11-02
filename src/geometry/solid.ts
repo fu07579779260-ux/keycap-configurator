@@ -28,14 +28,15 @@ export function cavityParams(p: BodyParams, wall: number): BodyParams {
   }
 }
 
-type Extras = { textOutline?: Outline }
+type Extras = { textOutline?: Outline; uploadedBase?: MeshData }
 
 /**
  * Hollow keycap with its stems, as one closed printable mesh (Z-up, mm):
  * outer body − cavity, plus each stem post (trimmed to the inside of the
  * cap) minus its socket widened by the fit tolerance, plus the tactile
  * marker and raised legend, minus an engraved legend.
- * `extras.textOutline` carries traced legend text (browser only).
+ * `extras.textOutline` carries traced legend text (browser only);
+ * `extras.uploadedBase` an uploaded base model that replaces the main stem.
  */
 export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras: Extras = {}): MeshData {
   return withSolids(wasm, config, extras, ({ shell, raised, cut }, own) => {
@@ -104,10 +105,20 @@ function withSolids<T>(
     let shell = own(outer.subtract(cavity))
 
     const layout = stemLayout(config)
+    // An uploaded base replaces the generated main stem; stabilisers are still generated
+    const uploaded = config.stem.type === 'upload' && extras.uploadedBase ? extras.uploadedBase : null
     const stems = [
-      { at: layout.main, shape: mainStemShape(config) },
+      ...(uploaded ? [] : [{ at: layout.main, shape: mainStemShape(config) }]),
       ...layout.stabilisers.map((at) => ({ at, shape: stabiliserStemShape(config) })),
     ]
+
+    if (uploaded) {
+      // Keep the upload within the cap and the space straight below it (nothing poking out sideways or on top)
+      const below = own(own(Manifold.cube([p.bottomWidth, p.bottomDepth, 30], true)).translate(0, 0, -15))
+      const allowed = own(outer.add(below))
+      const base = own(own(toManifold(wasm, uploaded)).intersect(allowed))
+      shell = own(shell.add(base))
+    }
     const tolerance = config.stem.fitTolerance
     const postHeight = p.height + 10
 

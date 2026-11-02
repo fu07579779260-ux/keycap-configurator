@@ -16,6 +16,7 @@ export type CheckId =
   | 'stem-approx'
   | 'translucent-opaque'
   | 'second-colour-unused'
+  | 'upload-missing'
 
 /** "warning": likely to print badly or not fit. "note": worth knowing, not a problem by itself. */
 export interface Check {
@@ -36,9 +37,15 @@ const mm = (v: number) => v.toFixed(2)
 /** Materials that let light through; translucency means nothing on the others. */
 const CLEAR_MATERIALS = ['clear', 'petg']
 
-/** Things to check before printing, worst first. */
-export function printChecks(config: KeycapConfig, printer: PrinterPreset): Check[] {
+/**
+ * Things to check before printing, worst first. `context.hasUpload` says
+ * whether an uploaded base file is loaded (it isn't part of the design).
+ */
+export function printChecks(config: KeycapConfig, printer: PrinterPreset, context: { hasUpload?: boolean } = {}): Check[] {
   const checks: Check[] = []
+  if (config.stem.type === 'upload' && !context.hasUpload) {
+    checks.push({ id: 'upload-missing', level: 'warning', values: {} })
+  }
   const p = bodyParams(config)
   const { size, top, legend, stem, manufacturing } = config
   const tech = TECHNOLOGY_DEFAULTS[manufacturing.technology]

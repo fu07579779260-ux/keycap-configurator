@@ -1,13 +1,5 @@
-import type { KeycapConfig } from '@/model/config'
-
 /** Closed outlines in mm, centred on (0, 0); y points towards the back. Holes are separate loops (even-odd). */
 export type Outline = [number, number][][]
-
-/** Browser-side inputs that buildKeycap can't make itself: the traced legend text. */
-export function keycapExtras(config: KeycapConfig): { textOutline?: Outline } {
-  const { legend } = config
-  return legend.type === 'text' && legend.text.trim() ? { textOutline: traceText(legend.text, legend.textSize) } : {}
-}
 
 /** Pixels per em when rasterising; 160 px for a 4 mm legend gives 0.025 mm steps. */
 const FONT_PX = 160

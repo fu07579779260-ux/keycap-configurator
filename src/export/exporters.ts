@@ -4,10 +4,11 @@ import { printChecks } from '@/geometry/checks'
 import { meshSize, meshVolume } from '@/geometry/dimensions'
 import { loadManifold } from '@/geometry/manifold-loader'
 import { buildKeycap, buildKeycapParts } from '@/geometry/solid'
-import { keycapExtras } from '@/geometry/text-outline'
+import { keycapExtras } from '@/geometry/keycap-extras'
 import type { KeycapConfig } from '@/model/config'
 import { TOP_FORMS } from '@/model/options'
 import type { PrinterPreset } from '@/model/printers'
+import { uploadStore } from '@/model/upload-store'
 import { toDesignFile } from '@/model/serialize'
 import { captureJpegDataUrl, capturePng } from './capture'
 import { designFileName } from './filename'
@@ -80,7 +81,7 @@ export async function pdfFile(config: KeycapConfig, printer: PrinterPreset): Pro
       volume: meshVolume((parts?.body ?? whole).positions, (parts?.body ?? whole).indices),
       accentVolume: parts?.accent ? meshVolume(parts.accent.positions, parts.accent.indices) : 0,
     },
-    printChecks(config, printer),
+    printChecks(config, printer, { hasUpload: uploadStore.get() !== null }),
     designFileName(config, 'stl'),
   )
   return { name, blob: await sheetPdf(content, captureJpegDataUrl()) }

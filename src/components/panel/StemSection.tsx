@@ -3,6 +3,7 @@ import { RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
 import { STEM_TYPES } from '@/model/options'
 import { ChoiceGroup, PanelSection, ParamSlider } from './controls'
+import { UploadField } from './UploadField'
 
 export function StemSection() {
   const t = useT()
@@ -19,6 +20,8 @@ export function StemSection() {
         columns={4}
         hint={t(`stem.hint.${stem.type}`)}
       />
+
+      {stem.type === 'upload' && <UploadField />}
 
       {stem.type === 'custom' && (
         <>

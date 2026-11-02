@@ -25,6 +25,8 @@ export interface StemConfig {
   fitTolerance: number
   /** File name of an uploaded base model; the geometry itself is kept outside the config. */
   uploadName: string | null
+  /** Centre the uploaded base on the stem and stand it on the base plane (off = use its own coordinates). */
+  uploadAutoPlace: boolean
 }
 
 export interface SizeConfig {
@@ -149,6 +151,7 @@ export const DEFAULT_CONFIG: KeycapConfig = {
     outerDiameter: 5.5,
     fitTolerance: TECHNOLOGY_DEFAULTS.sla.fitTolerance,
     uploadName: null,
+    uploadAutoPlace: true,
   },
   size: {
     widthU: 1,

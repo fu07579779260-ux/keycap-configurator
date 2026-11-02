@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { bodyParams, buildBody, type MeshData } from '@/geometry/body'
 import { loadManifold } from '@/geometry/manifold-loader'
 import { buildKeycap, buildKeycapParts } from '@/geometry/solid'
-import { keycapExtras } from '@/geometry/text-outline'
+import { keycapExtras } from '@/geometry/keycap-extras'
 import type { KeycapConfig } from '@/model/config'
+import { useUploadedBase } from '@/model/upload-store'
 
 interface KeycapMeshes {
   /** Main-colour part (the whole keycap when there's no second colour). */
@@ -21,13 +22,14 @@ interface KeycapMeshes {
 export function useKeycapMesh(config: KeycapConfig): KeycapMeshes {
   const solid = useMemo(() => buildBody(bodyParams(config)), [config])
   const [built, setBuilt] = useState<{ body: MeshData; accent: MeshData | null } | null>(null)
+  const upload = useUploadedBase()
 
   useEffect(() => {
     let cancelled = false
     loadManifold()
       .then((wasm) => {
         if (cancelled) return
-        const extras = keycapExtras(config)
+        const extras = keycapExtras(config, upload)
         setBuilt(
           config.manufacturing.secondColour
             ? buildKeycapParts(wasm, config, extras)
@@ -38,7 +40,7 @@ export function useKeycapMesh(config: KeycapConfig): KeycapMeshes {
     return () => {
       cancelled = true
     }
-  }, [config])
+  }, [config, upload])
 
   // Keep showing the previous result while the next one is built, so the view doesn't flicker
   if (built) return { ...built, hollow: true }
