@@ -12,6 +12,20 @@ const TEXTURE_PITCH = 1.6
 /** Ring: width of the band. */
 const RING_BAND = 0.8
 
+/** A single rounded bump sitting on the top surface at (x, y), trimmed so its base is buried. */
+export function surfaceDome(M: typeof Manifold, p: BodyParams, x: number, y: number, diameter: number, height: number): Manifold {
+  const r = diameter / 2
+  const z = topSurfaceZ(p, x, y)
+  let min = Infinity
+  for (const dx of [-1, 0, 1]) for (const dy of [-1, 0, 1]) min = Math.min(min, topSurfaceZ(p, x + dx * r, y + dy * r))
+  const sphere = M.sphere(r, 24)
+  const flat = sphere.scale([1, 1, height / r])
+  const placed = flat.translate(x, y, z)
+  const trimmed = placed.trimByPlane([0, 0, 1], Math.max(min - EMBED, z - MAX_EMBED))
+  for (const m of [sphere, flat, placed]) m.delete()
+  return trimmed
+}
+
 /**
  * Raised tactile marker on the top surface (dot, bar, ring or texture),
  * or null when the top form isn't tactile. Position is relative to the

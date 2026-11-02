@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { ExportSection } from '@/components/panel/ExportSection'
+import { LegendSection } from '@/components/panel/LegendSection'
 import { SizeSection } from '@/components/panel/SizeSection'
 import { StemSection } from '@/components/panel/StemSection'
 import { TopSection } from '@/components/panel/TopSection'
@@ -36,6 +37,7 @@ export function ConfigurePage() {
           {t('configure.parameters')}
         </h2>
         <TopSection />
+        <LegendSection />
         <SizeSection />
         <StemSection />
         <ExportSection />

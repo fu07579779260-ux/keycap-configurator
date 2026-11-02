@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { bodyParams, buildBody, type MeshData } from '@/geometry/body'
 import { loadManifold } from '@/geometry/manifold-loader'
 import { buildKeycap } from '@/geometry/solid'
+import { keycapExtras } from '@/geometry/text-outline'
 import type { KeycapConfig } from '@/model/config'
 
 /**
@@ -17,7 +18,7 @@ export function useKeycapMesh(config: KeycapConfig): { mesh: MeshData; hollow: b
     let cancelled = false
     loadManifold()
       .then((wasm) => {
-        if (!cancelled) setShell({ config, mesh: buildKeycap(wasm, config) })
+        if (!cancelled) setShell({ config, mesh: buildKeycap(wasm, config, keycapExtras(config)) })
       })
       .catch((error) => console.error('Could not build the hollow keycap', error))
     return () => {

@@ -1,7 +1,10 @@
 import type { Manifold, ManifoldToplevel } from 'manifold-3d'
 import type { KeycapConfig } from '@/model/config'
 import { bodyParams, buildBody, type BodyParams, type MeshData } from './body'
+import { buildLegend } from './legends'
+import { fromManifold, toManifold } from './manifold-mesh'
 import { buildMarker } from './markers'
+import type { Outline } from './text-outline'
 import { mainStemShape, stabiliserStemShape, STEM_INSET, type StemShape } from './stem-shapes'
 import { stemLayout } from './stems'
 
@@ -29,9 +32,10 @@ export function cavityParams(p: BodyParams, wall: number): BodyParams {
  * Hollow keycap with its stems, as a closed printable mesh (Z-up, mm):
  * outer body − cavity, plus the tactile marker, plus each stem post
  * (trimmed to the inside of the cap) minus its socket, widened by the
- * fit tolerance.
+ * fit tolerance, then the legend raised or engraved.
+ * `extras.textOutline` carries traced legend text (browser only).
  */
-export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig): MeshData {
+export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig, extras: { textOutline?: Outline } = {}): MeshData {
   const { Manifold } = wasm
   // Every Manifold lives in WASM memory and must be freed
   const owned: Manifold[] = []
@@ -64,27 +68,19 @@ export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig): MeshD
       shell = own(shell.subtract(socket))
     }
 
+    // Legend last, so an engraving also cuts through where a stem meets the top
+    const legend = buildLegend(wasm, p, config.legend, wall, extras.textOutline)
+    if (legend.add) shell = own(shell.add(own(legend.add)))
+    if (legend.cut) shell = own(shell.subtract(own(legend.cut)))
+
+    // Dots or markers placed beyond the top would print as loose pieces: keep only the keycap
+    const pieces = shell.decompose().map(own)
+    if (pieces.length > 1) shell = pieces.reduce((a, b) => (b.volume() > a.volume() ? b : a))
+
     return fromManifold(shell)
   } finally {
     for (const m of owned) m.delete()
   }
-}
-
-function toManifold(wasm: ManifoldToplevel, data: MeshData): Manifold {
-  const mesh = new wasm.Mesh({ numProp: 3, vertProperties: data.positions, triVerts: data.indices })
-  // The body duplicates its bottom-edge vertices (for a sharp edge); merge them for a closed solid
-  mesh.merge()
-  return new wasm.Manifold(mesh)
-}
-
-function fromManifold(m: Manifold): MeshData {
-  const mesh = m.getMesh()
-  const n = mesh.vertProperties.length / mesh.numProp
-  const positions = new Float32Array(n * 3)
-  for (let i = 0; i < n; i++) {
-    for (let k = 0; k < 3; k++) positions[i * 3 + k] = mesh.vertProperties[i * mesh.numProp + k]
-  }
-  return { positions, indices: new Uint32Array(mesh.triVerts) }
 }
 
 /** Solid post around the socket, standing on z = 0. */

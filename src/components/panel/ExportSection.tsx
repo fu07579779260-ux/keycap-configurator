@@ -5,6 +5,7 @@ import { designFileName } from '@/export/filename'
 import { meshToStl } from '@/export/stl'
 import { loadManifold } from '@/geometry/manifold-loader'
 import { buildKeycap } from '@/geometry/solid'
+import { keycapExtras } from '@/geometry/text-outline'
 import { useT } from '@/i18n/language'
 import { useDesign } from '@/model/design-context'
 import { PanelSection } from './controls'
@@ -20,7 +21,7 @@ export function ExportSection() {
     setStatus({ state: 'working' })
     try {
       const wasm = await loadManifold()
-      const mesh = buildKeycap(wasm, config)
+      const mesh = buildKeycap(wasm, config, keycapExtras(config))
       const stl = meshToStl(mesh, `Keycap Configurator - ${designFileName(config, 'stl')}`)
       const fileName = designFileName(config, 'stl')
       downloadBlob(new Blob([stl], { type: 'model/stl' }), fileName)
