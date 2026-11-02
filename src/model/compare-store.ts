@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react'
+import { readJson, writeJson } from '@/persistence/storage'
 import type { KeycapConfig } from './config'
 import { TOP_FORMS } from './options'
+import { sanitizeConfig } from './sanitize'
 
 /** Keycaps on the Compare page, left to right. */
 export interface CompareItem {
@@ -11,12 +13,21 @@ export interface CompareItem {
 /** Enough for a row of comparisons without making the scene unreadable. */
 export const MAX_COMPARE = 8
 
-let items: CompareItem[] = []
+const STORAGE_KEY = 'compare'
+
 let nextId = 1
+// Remembered between visits in this browser (designs only; ids are per visit)
+let items: CompareItem[] = (readJson<unknown[]>(STORAGE_KEY) ?? [])
+  .slice(0, MAX_COMPARE)
+  .map((saved) => ({ id: nextId++, config: sanitizeConfig(saved) }))
 const listeners = new Set<() => void>()
 
 function set(next: CompareItem[]) {
   items = next
+  writeJson(
+    STORAGE_KEY,
+    next.map((i) => i.config),
+  )
   for (const l of listeners) l()
 }
 

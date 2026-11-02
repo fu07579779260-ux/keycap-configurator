@@ -57,13 +57,3 @@ export function FingerFitPage() {
   const t = useT()
   return <PagePlaceholder title={t('page.fingerFit.title')} summary={t('page.fingerFit.summary')} />
 }
-
-export function PresetsPage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.presets.title')} summary={t('page.presets.summary')} />
-}
-
-export function SettingsPage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.settings.title')} summary={t('page.settings.summary')} />
-}

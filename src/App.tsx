@@ -5,7 +5,9 @@ import { useT } from '@/i18n/language'
 import { useRoute, type Route } from '@/lib/router'
 import { ComparePage } from '@/pages/ComparePage'
 import { ConfigurePage } from '@/pages/ConfigurePage'
-import { FingerFitPage, HomePage, PresetsPage, SettingsPage } from '@/pages/pages'
+import { FingerFitPage, HomePage } from '@/pages/pages'
+import { PresetsPage } from '@/pages/PresetsPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 const PAGES: Record<Route, ComponentType> = {
   '/': HomePage,

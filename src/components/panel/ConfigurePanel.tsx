@@ -7,6 +7,7 @@ import { ChecksSection } from './ChecksSection'
 import { ExportSection } from './ExportSection'
 import { LegendSection } from './LegendSection'
 import { PrintSection } from './PrintSection'
+import { ShareSection } from './ShareSection'
 import { SizeSection } from './SizeSection'
 import { StemSection } from './StemSection'
 import { TopSection } from './TopSection'
@@ -20,11 +21,20 @@ const STEPS: { title: StringKey; intro: StringKey; sections: ComponentType[] }[]
   { title: 'step.top', intro: 'step.top.intro', sections: [TopSection] },
   { title: 'step.legend', intro: 'step.legend.intro', sections: [LegendSection] },
   { title: 'step.print', intro: 'step.print.intro', sections: [PrintSection, ChecksSection] },
-  { title: 'step.export', intro: 'step.export.intro', sections: [ChecksSection, ExportSection] },
+  { title: 'step.export', intro: 'step.export.intro', sections: [ChecksSection, ExportSection, ShareSection] },
 ]
 
 /** Expert mode: everything at once, in the order people usually tweak things. */
-const EXPERT: ComponentType[] = [TopSection, LegendSection, SizeSection, StemSection, PrintSection, ChecksSection, ExportSection]
+const EXPERT: ComponentType[] = [
+  TopSection,
+  LegendSection,
+  SizeSection,
+  StemSection,
+  PrintSection,
+  ChecksSection,
+  ExportSection,
+  ShareSection,
+]
 
 const MODE_KEY = 'keycap.mode'
 
