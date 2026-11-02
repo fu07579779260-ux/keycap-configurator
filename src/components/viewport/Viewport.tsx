@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { KEY_PITCH, meshSize } from '@/geometry/dimensions'
 import { stemLayout } from '@/geometry/stems'
 import { useT } from '@/i18n/language'
+import { compareList, MAX_COMPARE, useCompareList } from '@/model/compare-store'
 import { useDesign } from '@/model/design-context'
 import type { Material } from '@/model/options'
 import { CaptureRegistrar } from './CaptureRegistrar'
@@ -55,6 +56,7 @@ export default function Viewport() {
   // Bumping the counter remounts the controls, which also clears leftover damping motion
   const [view, setView] = useState<{ mode: ViewMode; n: number }>({ mode: 'top', n: 0 })
   const { body, accent, hollow } = useKeycapMesh(config)
+  const compareCount = useCompareList().length
   const stems = useMemo(() => stemLayout(config), [config])
   // Measure both parts together: a raised accent stands above the body
   const { width, depth, height } = accent ? meshSize(body.positions, accent.positions) : meshSize(body.positions)
@@ -132,7 +134,16 @@ export default function Viewport() {
             </p>
           )}
         </div>
-        <div className="pointer-events-auto flex gap-2">
+        <div className="pointer-events-auto flex flex-wrap justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-ink bg-paper"
+            disabled={compareCount >= MAX_COMPARE}
+            onClick={() => compareList.add(config)}
+          >
+            + {t('viewport.addCompare')} ({compareCount})
+          </Button>
           <Button
             size="sm"
             variant="outline"

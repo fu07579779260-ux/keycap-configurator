@@ -53,11 +53,6 @@ export function HomePage() {
   )
 }
 
-export function ComparePage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.compare.title')} summary={t('page.compare.summary')} />
-}
-
 export function FingerFitPage() {
   const t = useT()
   return <PagePlaceholder title={t('page.fingerFit.title')} summary={t('page.fingerFit.summary')} />

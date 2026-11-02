@@ -109,6 +109,15 @@ export async function formSetFiles(config: KeycapConfig): Promise<ExportFile[]> 
   })
 }
 
+/** The keycaps on the Compare page, one STL each, numbered in their order. */
+export async function compareSetFiles(configs: KeycapConfig[]): Promise<ExportFile[]> {
+  const wasm = await loadManifold()
+  return configs.map((config, i) => {
+    const name = `${String(i + 1).padStart(2, '0')}-${designFileName(config, 'stl')}`
+    return { name, blob: stlBlob(buildKeycap(wasm, config, keycapExtras(config)), name) }
+  })
+}
+
 /** Pack files into one ZIP. */
 export async function zipFiles(files: ExportFile[], name: string): Promise<ExportFile> {
   const { default: JSZip } = await import('jszip')
