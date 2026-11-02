@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import { ExportSection } from '@/components/panel/ExportSection'
 import { SizeSection } from '@/components/panel/SizeSection'
 import { StemSection } from '@/components/panel/StemSection'
 import { TopSection } from '@/components/panel/TopSection'
@@ -37,6 +38,7 @@ export function ConfigurePage() {
         <TopSection />
         <SizeSection />
         <StemSection />
+        <ExportSection />
         <p className="px-4 py-6 text-sm text-graphite">{t('configure.parametersPending')}</p>
       </aside>
     </div>
