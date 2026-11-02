@@ -4,7 +4,7 @@ import { PROFILE_SHAPES } from '@/geometry/profiles'
 import { useT } from '@/i18n/language'
 import { RANGES } from '@/model/config'
 import { useDesign } from '@/model/design-context'
-import { DISH_SHAPES, SLOPE_DIRECTIONS, TOP_FORMS, type TopForm } from '@/model/options'
+import { DISH_SHAPES, MARKER_TYPES, SLOPE_DIRECTIONS, TOP_FORMS, type TopForm } from '@/model/options'
 import { cn } from '@/lib/utils'
 import { ChoiceGroup, PanelSection, ParamSlider } from './controls'
 
@@ -102,7 +102,41 @@ export function TopSection() {
       )}
 
       {top.form === 'flat' && <p className="text-xs text-graphite">{t('form.flatHint')}</p>}
-      {top.form === 'tactile' && <p className="text-xs text-graphite">{t('form.tactilePending')}</p>}
+      {top.form === 'tactile' && (
+        <>
+          <ChoiceGroup
+            label={t('field.markerType')}
+            value={top.markerType}
+            options={MARKER_TYPES.map((m) => ({ value: m, label: t(`marker.${m}`) }))}
+            onChange={(markerType) => patch('top', { markerType })}
+            hint={t(`marker.hint.${top.markerType}`)}
+          />
+          <ParamSlider
+            label={t('field.markerSize')}
+            value={top.markerSize}
+            range={RANGES.top.markerSize}
+            onChange={(markerSize) => patch('top', { markerSize })}
+          />
+          <ParamSlider
+            label={t('field.markerHeight')}
+            value={top.markerHeight}
+            range={RANGES.top.markerHeight}
+            onChange={(markerHeight) => patch('top', { markerHeight })}
+          />
+          <ParamSlider
+            label={t('field.markerX')}
+            value={top.markerX}
+            range={RANGES.top.markerX}
+            onChange={(markerX) => patch('top', { markerX })}
+          />
+          <ParamSlider
+            label={t('field.markerY')}
+            value={top.markerY}
+            range={RANGES.top.markerY}
+            onChange={(markerY) => patch('top', { markerY })}
+          />
+        </>
+      )}
     </PanelSection>
   )
 }

@@ -1,6 +1,7 @@
 import type { Manifold, ManifoldToplevel } from 'manifold-3d'
 import type { KeycapConfig } from '@/model/config'
 import { bodyParams, buildBody, type BodyParams, type MeshData } from './body'
+import { buildMarker } from './markers'
 import { mainStemShape, stabiliserStemShape, STEM_INSET, type StemShape } from './stem-shapes'
 import { stemLayout } from './stems'
 
@@ -26,8 +27,9 @@ export function cavityParams(p: BodyParams, wall: number): BodyParams {
 
 /**
  * Hollow keycap with its stems, as a closed printable mesh (Z-up, mm):
- * outer body − cavity, plus each stem post (trimmed to the inside of the
- * cap) minus its socket, widened by the fit tolerance.
+ * outer body − cavity, plus the tactile marker, plus each stem post
+ * (trimmed to the inside of the cap) minus its socket, widened by the
+ * fit tolerance.
  */
 export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig): MeshData {
   const { Manifold } = wasm
@@ -42,6 +44,9 @@ export function buildKeycap(wasm: ManifoldToplevel, config: KeycapConfig): MeshD
     const outer = own(toManifold(wasm, buildBody(p)))
     const cavity = own(own(toManifold(wasm, buildBody(cavityParams(p, wall)))).translate(0, 0, -CUT_MARGIN))
     let shell = own(outer.subtract(cavity))
+
+    const marker = buildMarker(Manifold, p, config.top)
+    if (marker) shell = own(shell.add(own(marker)))
 
     const layout = stemLayout(config)
     const stems = [

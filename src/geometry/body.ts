@@ -135,17 +135,21 @@ function topOffset(p: BodyParams, x: number, y: number): number {
   }
 }
 
+/** Height of the finished top surface at (x, y): profile height, row tilt and top shape. */
+export function topSurfaceZ(p: BodyParams, x: number, y: number): number {
+  const tan = Math.tan((p.tilt * Math.PI) / 180)
+  return p.height + (y - p.topSkew) * tan + topOffset(p, x, y)
+}
+
 /**
  * Solid keycap body: a loft from the bottom footprint to the (tilted) top,
  * a quarter-circle fillet into the top, and a top surface shaped by the top
  * form. The top shape also bends the upper wall edge, as on real dished keycaps.
  */
 export function buildBody(p: BodyParams): MeshData {
-  const tan = Math.tan((p.tilt * Math.PI) / 180)
   // The fillet can't be larger than the top or than half the height
   const fillet = Math.max(0, Math.min(p.topFillet, p.topWidth / 2 - 0.5, p.topDepth / 2 - 0.5, p.height / 2))
-  const surfaceZ = (x: number, y: number, drop: number) =>
-    p.height - drop + (y - p.topSkew) * tan + topOffset(p, x, y)
+  const surfaceZ = (x: number, y: number, drop: number) => topSurfaceZ(p, x, y) - drop
 
   const rings: [number, number, number][][] = []
 
