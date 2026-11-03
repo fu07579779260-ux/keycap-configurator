@@ -5,6 +5,8 @@ import { readJson, writeJson } from '@/persistence/storage'
 export interface Display {
   largeText: boolean
   highContrast: boolean
+  /** English voice feedback (on by default, PLAN.md §5). */
+  voice: boolean
 }
 
 const KEY = 'display'
@@ -23,6 +25,7 @@ function load(): Display {
     largeText: saved?.largeText === true,
     // First visit: follow the system's "increase contrast" setting
     highContrast: typeof saved?.highContrast === 'boolean' ? saved.highContrast : prefers('(prefers-contrast: more)'),
+    voice: saved?.voice !== false,
   }
 }
 

@@ -4,6 +4,7 @@ import { href, ROUTES, type Route } from '@/lib/router'
 import { cn } from '@/lib/utils'
 import { KeycapMark } from './KeycapMark'
 import { LanguageSwitch } from './LanguageSwitch'
+import { VoiceToggle } from './VoiceToggle'
 
 const NAV_LABELS: Record<Route, StringKey> = {
   '/': 'nav.home',
@@ -24,7 +25,8 @@ export function AppHeader({ route }: { route: Route }) {
           <KeycapMark className="size-7" />
           <span className="font-semibold tracking-tight">{t('app.title')}</span>
         </a>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <VoiceToggle />
           <LanguageSwitch />
         </div>
       </div>

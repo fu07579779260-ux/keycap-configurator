@@ -8,6 +8,7 @@ import { useT } from '@/i18n/language'
 import { compareList, MAX_COMPARE, useCompareList } from '@/model/compare-store'
 import { useDesign } from '@/model/design-context'
 import type { Material } from '@/model/options'
+import { describeDesign } from '@/components/compare/describe'
 import { prefersReducedMotion } from '@/model/display'
 import { CaptureRegistrar } from './CaptureRegistrar'
 import { KeyboardOrbit } from './KeyboardOrbit'
@@ -116,7 +117,11 @@ export default function Viewport() {
         )}
         <CameraHome homeKey={homeKey} mode={view.mode} distance={distance} targetY={targetY} />
         <CaptureRegistrar />
-        <KeyboardOrbit onReset={resetView} label={`${t('viewport.label')}: ${dims}`} describedBy="viewport-keys" />
+        <KeyboardOrbit
+          onReset={resetView}
+          label={`${t('viewport.label')}: ${describeDesign(config, t)} · ${dims}`}
+          describedBy="viewport-keys"
+        />
         <OrbitControls
           key={homeKey}
           makeDefault

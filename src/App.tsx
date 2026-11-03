@@ -3,6 +3,7 @@ import { AppFooter } from '@/components/layout/AppFooter'
 import { AppHeader } from '@/components/layout/AppHeader'
 import { useT } from '@/i18n/language'
 import { useRoute, type Route } from '@/lib/router'
+import { VoiceAnnouncer } from '@/voice/VoiceAnnouncer'
 import { ComparePage } from '@/pages/ComparePage'
 import { ConfigurePage } from '@/pages/ConfigurePage'
 import { FingerFitPage, HomePage } from '@/pages/pages'
@@ -41,6 +42,7 @@ export default function App() {
         <Page />
       </main>
       <AppFooter route={route} />
+      <VoiceAnnouncer />
     </div>
   )
 }

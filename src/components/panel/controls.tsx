@@ -104,11 +104,17 @@ export function ChoiceGroup<T extends string>({ label, value, options, onChange,
             {o.label}
           </label>
         ))}
+        {/* Fill the rest of the last row, so the divider colour doesn't show as a block */}
+        {Array.from({ length: fillers(options.length, columns ?? options.length) }, (_, i) => (
+          <span key={`fill-${i}`} aria-hidden="true" className="bg-card" />
+        ))}
       </div>
       {hint && <p className="text-xs text-graphite">{hint}</p>}
     </fieldset>
   )
 }
+
+const fillers = (count: number, columns: number) => (columns - (count % columns)) % columns
 
 /** Native drop-down, for lists too long or too wordy for a segmented choice. */
 export function SelectField<T extends string>({ label, value, options, onChange }: {

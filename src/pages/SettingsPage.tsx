@@ -8,6 +8,35 @@ import { displayStore, useDisplay } from '@/model/display'
 import { userPrinters, useUserPrinters } from '@/model/user-printers'
 import { stopAutosave } from '@/persistence/session'
 import { clearAllStorage } from '@/persistence/storage'
+import { keyName } from '@/voice/key-names'
+import { KEY_TESTER_ATTR } from '@/voice/legend-speech'
+import { speechSupported } from '@/voice/speech'
+
+/** Press keys here to hear (and see) their names: handy for checking freshly installed keycaps. */
+function KeyTester({ enabled }: { enabled: boolean }) {
+  const t = useT()
+  const [last, setLast] = useState<string | null>(null)
+  return (
+    <div
+      {...{ [KEY_TESTER_ATTR]: '' }}
+      tabIndex={0}
+      role="application"
+      aria-label={t('settings.keyTester')}
+      onKeyDown={(e) => {
+        // Keep Tab working so keyboard users can leave the box
+        if (e.key !== 'Tab') e.preventDefault()
+        setLast(keyName(e))
+      }}
+      className="flex min-h-24 flex-col items-center justify-center gap-1 border border-dashed border-ink bg-card p-4 text-center"
+    >
+      <span className="annotation">{t('settings.keyTester')}</span>
+      <span aria-live="polite" className="font-mono text-2xl">
+        {last ?? '—'}
+      </span>
+      <span className="text-xs text-graphite">{enabled ? t('settings.keyTesterHint') : t('settings.keyTesterSilent')}</span>
+    </div>
+  )
+}
 
 function Block({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -53,7 +82,13 @@ export function SettingsPage() {
           checked={display.highContrast}
           onChange={(highContrast) => displayStore.set({ highContrast })}
         />
-        <p className="text-xs text-graphite">{t('settings.voicePending')}</p>
+        <ToggleField
+          label={t('settings.voice')}
+          checked={display.voice}
+          onChange={(voice) => displayStore.set({ voice })}
+          hint={speechSupported() ? t('settings.voiceHint') : t('settings.voiceUnsupported')}
+        />
+        <KeyTester enabled={display.voice} />
       </Block>
 
       <Block title={t('settings.printers')}>
