@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
 import { Button } from '@/components/ui/button'
 import { useT } from '@/i18n/language'
@@ -10,7 +10,7 @@ import { stopAutosave } from '@/persistence/session'
 import { clearAllStorage } from '@/persistence/storage'
 import { keyName } from '@/voice/key-names'
 import { KEY_TESTER_ATTR } from '@/voice/legend-speech'
-import { speechSupported } from '@/voice/speech'
+import { onVoicesChanged, speak, speechSupported, voiceStatus } from '@/voice/speech'
 
 /** Press keys here to hear (and see) their names: handy for checking freshly installed keycaps. */
 function KeyTester({ enabled }: { enabled: boolean }) {
@@ -34,6 +34,23 @@ function KeyTester({ enabled }: { enabled: boolean }) {
         {last ?? '—'}
       </span>
       <span className="text-xs text-graphite">{enabled ? t('settings.keyTesterHint') : t('settings.keyTesterSilent')}</span>
+    </div>
+  )
+}
+
+/** "Test voice" button, plus a note when this computer has no English voice installed. */
+function VoiceCheck() {
+  const t = useT()
+  // The voice list loads after the page, so re-render when it arrives
+  const status = useSyncExternalStore(onVoicesChanged, voiceStatus)
+  if (!speechSupported()) return null
+  return (
+    <div className="space-y-2">
+      <Button size="sm" variant="outline" className="border-ink" onClick={() => speak('Voice feedback is working.')}>
+        {t('settings.testVoice')}
+      </Button>
+      {status === 'other' && <p className="text-xs text-signal">{t('settings.noEnglishVoice')}</p>}
+      {status === 'none' && <p className="text-xs text-signal">{t('settings.noVoice')}</p>}
     </div>
   )
 }
@@ -88,6 +105,7 @@ export function SettingsPage() {
           onChange={(voice) => displayStore.set({ voice })}
           hint={speechSupported() ? t('settings.voiceHint') : t('settings.voiceUnsupported')}
         />
+        <VoiceCheck />
         <KeyTester enabled={display.voice} />
       </Block>
 
