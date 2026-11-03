@@ -4,7 +4,6 @@ import { useT } from '@/i18n/language'
 import type { StringKey } from '@/i18n/strings'
 import { href } from '@/lib/router'
 import { TOP_FORMS } from '@/model/options'
-import { PagePlaceholder } from './placeholder'
 
 const FLOW: StringKey[] = ['home.flow.1', 'home.flow.2', 'home.flow.3', 'home.flow.4', 'home.flow.5']
 
@@ -51,9 +50,4 @@ export function HomePage() {
       </ul>
     </section>
   )
-}
-
-export function FingerFitPage() {
-  const t = useT()
-  return <PagePlaceholder title={t('page.fingerFit.title')} summary={t('page.fingerFit.summary')} />
 }
