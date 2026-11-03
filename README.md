@@ -7,6 +7,8 @@ eyewear configurator). See [PLAN.md](PLAN.md) for the full brief.
 
 **Choose a form → adjust parameters → preview → 3D print → install and test.**
 
+**Live site:** https://fu07579779260-ux.github.io/keycap-configurator/
+
 ## What it does
 
 - Six profiles (OEM, Cherry, SA, DSA, XDA, MT3) with rows, widths from 1u to 10u, stabiliser stems
