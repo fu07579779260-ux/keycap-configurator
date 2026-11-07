@@ -64,3 +64,27 @@ describe('legendSpeech', () => {
     expect(legendSpeech(legend({ type: 'text', text: '  ' }))).toBe('')
   })
 })
+
+describe('voice in the interface language', () => {
+  it('names keys in Chinese when the interface is Chinese', () => {
+    expect(keyName({ key: 'Backspace', code: 'Backspace' }, 'zh')).toBe('退格')
+    expect(keyName({ key: ' ', code: 'Space' }, 'zh')).toBe('空格')
+    expect(keyName({ key: 'ArrowLeft', code: 'ArrowLeft' }, 'zh')).toBe('左箭头')
+    expect(keyName({ key: '7', code: 'Numpad7' }, 'zh')).toBe('小键盘 7')
+    // Letters, digits and F keys read the same in both
+    expect(keyName({ key: 'j', code: 'KeyJ' }, 'zh')).toBe('J')
+    expect(keyName({ key: 'F5', code: 'F5' }, 'zh')).toBe('F5')
+  })
+
+  it('has a Chinese name for every named English key', () => {
+    const codes = ['Escape', 'Enter', 'Tab', 'CapsLock', 'ShiftLeft', 'ControlRight', 'MetaLeft', 'PageDown', 'Slash', 'NumpadAdd']
+    for (const code of codes) expect(keyName({ key: '', code }, 'zh')).toMatch(/\p{Script=Han}|Shift|Ctrl|Alt|Esc|Tab/u)
+  })
+
+  it('describes the legend in Chinese', () => {
+    expect(legendSpeech({ ...DEFAULT_CONFIG.legend, type: 'text', text: 'Esc' }, 'zh')).toBe('字符：Esc')
+    expect(legendSpeech({ ...DEFAULT_CONFIG.legend, type: 'braille', brailleText: 'ab' }, 'zh')).toBe('盲文：a，b')
+    expect(legendSpeech({ ...DEFAULT_CONFIG.legend, type: 'none' }, 'zh')).toBe('无字符')
+    expect(legendSpeech({ ...DEFAULT_CONFIG.legend, type: 'icon', icon: 'home' }, 'zh')).toMatch(/^图标：\p{Script=Han}/u)
+  })
+})

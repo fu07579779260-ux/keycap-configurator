@@ -1,7 +1,7 @@
 import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { LanguageSwitch } from '@/components/layout/LanguageSwitch'
 import { Button } from '@/components/ui/button'
-import { useT } from '@/i18n/language'
+import { useLanguage, useT } from '@/i18n/language'
 import { ToggleField } from '@/components/panel/controls'
 import { useDesign } from '@/model/design-context'
 import { displayStore, useDisplay } from '@/model/display'
@@ -15,6 +15,7 @@ import { onVoicesChanged, speak, speechSupported, voiceStatus } from '@/voice/sp
 /** Press keys here to hear (and see) their names: handy for checking freshly installed keycaps. */
 function KeyTester({ enabled }: { enabled: boolean }) {
   const t = useT()
+  const { lang } = useLanguage()
   const [last, setLast] = useState<string | null>(null)
   return (
     <div
@@ -25,7 +26,7 @@ function KeyTester({ enabled }: { enabled: boolean }) {
       onKeyDown={(e) => {
         // Keep Tab working so keyboard users can leave the box
         if (e.key !== 'Tab') e.preventDefault()
-        setLast(keyName(e))
+        setLast(keyName(e, lang))
       }}
       className="flex min-h-24 flex-col items-center justify-center gap-1 border border-dashed border-ink bg-card p-4 text-center"
     >
@@ -38,7 +39,7 @@ function KeyTester({ enabled }: { enabled: boolean }) {
   )
 }
 
-/** "Test voice" button, plus a note when this computer has no English voice installed. */
+/** "Test voice" button, plus a note when this computer has no voice for the interface language. */
 function VoiceCheck() {
   const t = useT()
   // The voice list loads after the page, so re-render when it arrives
@@ -46,10 +47,11 @@ function VoiceCheck() {
   if (!speechSupported()) return null
   return (
     <div className="space-y-2">
-      <Button size="sm" variant="outline" className="border-ink" onClick={() => speak('Voice feedback is working.')}>
+      <Button size="sm" variant="outline" className="border-ink" onClick={() => speak(t('settings.voiceTestPhrase'))}>
         {t('settings.testVoice')}
       </Button>
-      {status === 'other' && <p className="text-xs text-signal">{t('settings.noEnglishVoice')}</p>}
+      {status === 'noEnglish' && <p className="text-xs text-signal">{t('settings.noEnglishVoice')}</p>}
+      {status === 'noChinese' && <p className="text-xs text-signal">{t('settings.noChineseVoice')}</p>}
       {status === 'none' && <p className="text-xs text-signal">{t('settings.noVoice')}</p>}
     </div>
   )

@@ -3,7 +3,8 @@ import { SelectField } from '@/components/panel/controls'
 import { Button } from '@/components/ui/button'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import type { KeyboardView } from '@/components/keyboard/KeyboardScene'
-import { fill, useT } from '@/i18n/language'
+import { fill, useLanguage, useT } from '@/i18n/language'
+import type { Language } from '@/i18n/strings'
 import { endKeyboardEdit, keyboardEditChanged, startKeyboardEdit } from '@/keyboard/edit-session'
 import { findKey, LAYOUT_KEYS, LAYOUTS, type LayoutId } from '@/keyboard/layouts'
 import { keyboardStore, useKeyboardSettings } from '@/keyboard/keyboard-store'
@@ -35,12 +36,15 @@ function isFormField(target: EventTarget | null) {
 const isControl = (target: EventTarget | null) =>
   target instanceof HTMLElement && target.matches('button, a[href], summary, input, [role=button]')
 
-const nameOf = (code: string) => keyName({ code, key: '' }) || code
+const nameOf = (code: string, lang: Language) => keyName({ code, key: '' }, lang) || code
 
 export function KeyboardPage() {
   const t = useT()
   const { config, patch } = useDesign()
   const { voice } = useDisplay()
+  const { lang } = useLanguage()
+  const langRef = useRef(lang)
+  langRef.current = lang
   const settings = useKeyboardSettings()
   const keys = LAYOUT_KEYS[settings.layout]
   const placed = placeDesign(keys, config.size.widthU, settings.position)
@@ -62,7 +66,7 @@ export function KeyboardPage() {
   const press = useCallback((code: string, say = true) => {
     setPressed((p) => (p.has(code) ? p : new Set(p).add(code)))
     setLast({ code, onLayout: Boolean(findKey(keysRef.current, code)) })
-    if (say && voiceOn.current) speak(nameOf(code))
+    if (say && voiceOn.current) speak(nameOf(code, langRef.current))
   }, [])
   const release = useCallback((code: string) => {
     setPressed((p) => {
@@ -117,7 +121,7 @@ export function KeyboardPage() {
   const mismatch = placed ? rowMismatch(config, placed) : null
   const placingSet = useMemo(() => (placing ? new Set(fits.map((k) => k.code)) : null), [placing, fits])
   const width = String(config.size.widthU)
-  const label = placed ? fill(t('keyboard.label'), { key: nameOf(placed.code) }) : t('keyboard.labelBeside')
+  const label = placed ? fill(t('keyboard.label'), { key: nameOf(placed.code, lang) }) : t('keyboard.labelBeside')
 
   return (
     <section className="mx-auto max-w-6xl space-y-4 px-4 py-6">
@@ -140,7 +144,7 @@ export function KeyboardPage() {
           <SelectField
             label={t('keyboard.position')}
             value={placed.code}
-            options={fits.map((k) => ({ value: k.code, label: nameOf(k.code) }))}
+            options={fits.map((k) => ({ value: k.code, label: nameOf(k.code, lang) }))}
             onChange={place}
           />
         )}
@@ -212,7 +216,7 @@ export function KeyboardPage() {
           <div className="bg-paper/85 px-2 py-1">
             <p className="annotation">{t('keyboard.lastKey')}</p>
             <p aria-live="polite" className="font-mono text-xl">
-              {last ? nameOf(last.code) : t('keyboard.pressHint')}
+              {last ? nameOf(last.code, lang) : t('keyboard.pressHint')}
               {last && !last.onLayout && <span className="ml-2 text-xs text-graphite">({t('keyboard.notOnLayout')})</span>}
             </p>
           </div>

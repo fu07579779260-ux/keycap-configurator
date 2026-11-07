@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useLanguage } from '@/i18n/language'
 import { useDesign } from '@/model/design-context'
 import { useDisplay } from '@/model/display'
 import { describeFocus, describeValue } from './describe-focus'
@@ -8,7 +9,7 @@ import { KEY_TESTER_ATTR, legendSpeech } from './legend-speech'
 import { speak, stopSpeaking } from './speech'
 
 /**
- * English voice feedback (PLAN.md §5), on by default:
+ * Voice feedback in the interface language (PLAN.md §5), on by default:
  * 1. physical keys pressed when nothing is focused, or in the key tester;
  * 2. the control that gets keyboard focus or is clicked, and its new value when it changes;
  * 3. the keycap's legend when it changes (and the 3D view describes the key on focus).
@@ -16,7 +17,14 @@ import { speak, stopSpeaking } from './speech'
 export function VoiceAnnouncer() {
   const { voice } = useDisplay()
   const { config } = useDesign()
-  const legendText = legendSpeech(config.legend)
+  const { lang } = useLanguage()
+  // Read when speaking, so switching language doesn't restart the listeners (and cancel the switch's own announcement)
+  const langRef = useRef(lang)
+  langRef.current = lang
+  // Changes to the legend itself trigger an announcement, not a language switch
+  const legendKey = legendSpeech(config.legend)
+  const legendText = useRef('')
+  legendText.current = legendSpeech(config.legend, lang)
   const firstLegend = useRef(true)
 
   useEffect(() => {
@@ -30,7 +38,7 @@ export function VoiceAnnouncer() {
       const target = event.target as Element | null
       const inTester = target?.closest?.(`[${KEY_TESTER_ATTR}]`)
       const nothingFocused = !target || target === document.body || target === document.documentElement
-      if (inTester || nothingFocused) speak(keyName(event))
+      if (inTester || nothingFocused) speak(keyName(event, langRef.current))
     }
 
     // Chrome counts a slider grabbed with the mouse as :focus-visible, so remember recent presses
@@ -44,7 +52,7 @@ export function VoiceAnnouncer() {
       const el = event.target as Element
       // Keyboard focus only: mouse users get the click announcement below instead
       if (fromPointer() || !el.matches?.(':focus-visible') || el.closest(`[${KEY_TESTER_ATTR}]`)) return
-      speak(describeFocus(el))
+      speak(describeFocus(el, langRef.current))
     }
 
     let clickTimer: ReturnType<typeof setTimeout> | undefined
@@ -61,7 +69,7 @@ export function VoiceAnnouncer() {
       if (!el || el.closest(`[${KEY_TESTER_ATTR}]`) || (el instanceof HTMLInputElement && el.type === 'range')) return
       clearTimeout(clickTimer)
       // Wait for the app to update, so the new state is read ("Wizard, on", "Concave, selected")
-      clickTimer = setTimeout(() => speak(describeFocus(el)), 80)
+      clickTimer = setTimeout(() => speak(describeFocus(el, langRef.current)), 80)
     }
 
     let valueTimer: ReturnType<typeof setTimeout> | undefined
@@ -76,7 +84,7 @@ export function VoiceAnnouncer() {
       if (!keyboard && !pointerDone) return
       clearTimeout(valueTimer)
       // Wait for the slider to settle, so holding an arrow key doesn't stutter
-      valueTimer = setTimeout(() => speak(describeValue(el)), 250)
+      valueTimer = setTimeout(() => speak(describeValue(el, langRef.current)), 250)
     }
 
     document.addEventListener('keydown', onKeyDown)
@@ -103,10 +111,10 @@ export function VoiceAnnouncer() {
       firstLegend.current = false
       return
     }
-    if (!voice || !legendText) return
-    const timer = setTimeout(() => speak(legendText, { interrupt: false }), 800)
+    if (!voice || !legendKey) return
+    const timer = setTimeout(() => speak(legendText.current, { interrupt: false }), 800)
     return () => clearTimeout(timer)
-  }, [legendText, voice])
+  }, [legendKey, voice])
 
   return null
 }

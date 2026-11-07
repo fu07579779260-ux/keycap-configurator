@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { displayStore, useDisplay } from '@/model/display'
 import { speak, speechSupported } from '@/voice/speech'
 
-/** Always-visible switch for the English voice feedback. */
+/** Always-visible switch for the voice feedback (spoken in the interface language). */
 export function VoiceToggle() {
   const t = useT()
   const { voice } = useDisplay()
@@ -16,7 +16,7 @@ export function VoiceToggle() {
       onClick={() => {
         displayStore.set({ voice: !voice })
         // Confirm out loud when it's switched on
-        if (!voice) speak('Voice feedback on')
+        if (!voice) speak(t('voice.onSpoken'))
       }}
       className={cn('flex min-h-7 items-center gap-1.5 border border-ink px-2.5 font-mono text-xs', voice ? 'bg-ink text-paper' : 'hover:bg-secondary')}
     >
