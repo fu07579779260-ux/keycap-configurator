@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary'
 import type { KeyboardView } from '@/components/keyboard/KeyboardScene'
 import { fill, useT } from '@/i18n/language'
+import { endKeyboardEdit, keyboardEditChanged, startKeyboardEdit } from '@/keyboard/edit-session'
 import { findKey, LAYOUT_KEYS, LAYOUTS, type LayoutId } from '@/keyboard/layouts'
 import { keyboardStore, useKeyboardSettings } from '@/keyboard/keyboard-store'
 import { fittingKeys, placeDesign, rowMismatch } from '@/keyboard/placement'
@@ -49,6 +50,9 @@ export function KeyboardPage() {
   const [last, setLast] = useState<{ code: string; onLayout: boolean } | null>(null)
   const [placing, setPlacing] = useState(false)
   const [view, setView] = useState<{ mode: KeyboardView; n: number }>({ mode: 'angled', n: 0 })
+  // Back from "Edit this keycap": confirm the keyboard shows the edited keycap, then end the edit
+  const [updated] = useState(() => keyboardEditChanged(config))
+  useEffect(() => endKeyboardEdit(), [])
   const reducedMotion = prefersReducedMotion()
   const voiceOn = useRef(voice)
   voiceOn.current = voice
@@ -152,10 +156,18 @@ export function KeyboardPage() {
             </Button>
           )}
           <Button asChild>
-            <a href={href('/configure')}>{t('keyboard.edit')}</a>
+            <a href={href('/configure')} onClick={() => startKeyboardEdit(config)}>
+              {t('keyboard.edit')}
+            </a>
           </Button>
         </div>
         <div role="status" className="space-y-2 text-sm sm:col-span-3 empty:hidden">
+          {updated && (
+            <p>
+              <span aria-hidden className="mr-1.5 font-semibold text-signal">✓</span>
+              {t('keyboard.updated')}
+            </p>
+          )}
           {placing && <p>{fill(t('keyboard.pickHint'), { width })}</p>}
           {!placed && <p className="text-signal">{fill(t('keyboard.noFit'), { width })}</p>}
           {mismatch && (
