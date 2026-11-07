@@ -10,6 +10,7 @@ const NAV_LABELS: Record<Route, StringKey> = {
   '/': 'nav.home',
   '/configure': 'nav.configure',
   '/compare': 'nav.compare',
+  '/keyboard': 'nav.keyboard',
   '/finger-fit': 'nav.fingerFit',
   '/presets': 'nav.presets',
   '/settings': 'nav.settings',

@@ -5,6 +5,7 @@ export const ROUTES = [
   '/',
   '/configure',
   '/compare',
+  '/keyboard',
   '/finger-fit',
   '/presets',
   '/settings',

@@ -3,6 +3,7 @@ import { useDesign } from '@/model/design-context'
 import { useDisplay } from '@/model/display'
 import { describeFocus, describeValue } from './describe-focus'
 import { keyName } from './key-names'
+import { keyVoiceClaimed } from './key-voice'
 import { KEY_TESTER_ATTR, legendSpeech } from './legend-speech'
 import { speak, stopSpeaking } from './speech'
 
@@ -25,7 +26,7 @@ export function VoiceAnnouncer() {
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat) return
+      if (event.repeat || keyVoiceClaimed()) return
       const target = event.target as Element | null
       const inTester = target?.closest?.(`[${KEY_TESTER_ATTR}]`)
       const nothingFocused = !target || target === document.body || target === document.documentElement

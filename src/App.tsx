@@ -8,6 +8,7 @@ import { ComparePage } from '@/pages/ComparePage'
 import { ConfigurePage } from '@/pages/ConfigurePage'
 import { FingerFitPage } from '@/pages/FingerFitPage'
 import { HomePage } from '@/pages/pages'
+import { KeyboardPage } from '@/pages/KeyboardPage'
 import { PresetsPage } from '@/pages/PresetsPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 
@@ -15,6 +16,7 @@ const PAGES: Record<Route, ComponentType> = {
   '/': HomePage,
   '/configure': ConfigurePage,
   '/compare': ComparePage,
+  '/keyboard': KeyboardPage,
   '/finger-fit': FingerFitPage,
   '/presets': PresetsPage,
   '/settings': SettingsPage,
